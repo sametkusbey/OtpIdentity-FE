@@ -479,7 +479,6 @@ export const AuthorizationsPage = () => {
   return (
 
     <>
-
       <PageHeader
 
         title="Yetkilendirme Yönetimi"
