@@ -114,7 +114,7 @@ export const CompanyRepresentativesPage = () => {
 
     {
 
-      successMessage: 'Temsilci OluÅŸturuldu.',
+      successMessage: 'Temsilci Oluşturuldu.',
 
     },
 
@@ -126,7 +126,7 @@ export const CompanyRepresentativesPage = () => {
 
     {
 
-      successMessage: 'Temsilci GÃ¼ncellendi.',
+      successMessage: 'Temsilci Güncellendi.',
 
     },
 
@@ -232,13 +232,13 @@ export const CompanyRepresentativesPage = () => {
 
     modal.confirm({
 
-      title: 'Temsilci KaydÄ±ni silmek istediginize emin misiniz?',
+      title: 'Temsilci Kaydını silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
       okType: 'danger',
 
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
 
       centered: true,
 
@@ -330,7 +330,7 @@ export const CompanyRepresentativesPage = () => {
 
     {
 
-      title: 'Ä°ÅŸlemler',
+      title: 'İşlemler',
 
       key: 'actions',
 
@@ -340,7 +340,7 @@ export const CompanyRepresentativesPage = () => {
 
         <Space>
 
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
 
             <Button icon={<EditOutlined />} onClick={() => void openEditModal(record.id)} />
 
@@ -364,7 +364,7 @@ export const CompanyRepresentativesPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Temsilciler YÃ¼kleniyor..." />;
+    return <LoadingState text="Temsilciler Yükleniyor..." />;
 
   }
 
@@ -376,7 +376,7 @@ export const CompanyRepresentativesPage = () => {
 
       <ErrorState
 
-        subtitle="Temsilciler alinirken bir hata olustu."
+        subtitle="Temsilciler alınırken bir hata oluştu."
 
         onRetry={() => {
 
@@ -398,9 +398,9 @@ export const CompanyRepresentativesPage = () => {
 
       <PageHeader
 
-        title="Şirket Temsilcileri"
+        title="Şirket Temsilcileri Yönetimi"
 
-        description="Bayi sorumlularını kaydedin ve iletisim bilgilerine hizla ulasin."
+        description="Bayi sorumlularını kaydedin ve iletişim bilgilerine hızla ulaşın."
 
         actions={
 
@@ -436,7 +436,7 @@ export const CompanyRepresentativesPage = () => {
 
       <Modal
 
-        title={editingId ? 'Temsilciyi Duzenle' : 'Yeni Temsilci'}
+        title={editingId ? 'Temsilciyi Düzenle' : 'Yeni Temsilci'}
 
         open={isModalOpen}
 
@@ -444,9 +444,9 @@ export const CompanyRepresentativesPage = () => {
 
         onOk={() => void handleSubmit()}
 
-        okText={editingId ? 'GÃ¼ncelle' : 'OluÅŸtur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
 
-        cancelText="Vazgec"
+        cancelText="Vazgeç"
 
         width={600}
 
@@ -464,13 +464,13 @@ export const CompanyRepresentativesPage = () => {
 
                 name="dealerId"
 
-                rules={[{ required: true, message: 'Bayi SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Bayi Seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Bayi SeÃ§in"
+                  placeholder="Bayi Seçin"
 
                   options={dealerOptions}
 
@@ -502,7 +502,7 @@ export const CompanyRepresentativesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="Ad girin" />
 
               </Form.Item>
 
@@ -526,7 +526,7 @@ export const CompanyRepresentativesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="Soyad girin" />
 
               </Form.Item>
 
@@ -544,7 +544,7 @@ export const CompanyRepresentativesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="Telefon girin" />
 
               </Form.Item>
 
@@ -560,7 +560,7 @@ export const CompanyRepresentativesPage = () => {
 
                 rules={[
 
-                  { type: 'email', message: 'GeÃ§erli bir e-posta girin.' },
+                  { type: 'email', message: 'Geçerli bir e-posta girin.' },
 
                   { max: 256, message: 'En fazla 256 karakter olmalidir.' },
 
@@ -568,7 +568,7 @@ export const CompanyRepresentativesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="E-posta girin" />
 
               </Form.Item>
 

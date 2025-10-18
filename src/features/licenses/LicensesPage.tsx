@@ -20,6 +20,8 @@ import {
 
   Form,
 
+  Input,
+
   InputNumber,
 
   Modal,
@@ -148,13 +150,13 @@ export const LicensesPage = () => {
 
   const createMutation = useCreateMutation<LicensePayload>('licenses', {
 
-    successMessage: 'Lisans OluÅŸturuldu.',
+    successMessage: 'Lisans Oluşturuldu.',
 
   });
 
   const updateMutation = useUpdateMutation<LicensePayload>('licenses', {
 
-    successMessage: 'Lisans GÃ¼ncellendi.',
+    successMessage: 'Lisans Güncellendi.',
 
   });
 
@@ -294,7 +296,7 @@ export const LicensesPage = () => {
 
       okType: 'danger',
 
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
 
       centered: true,
 
@@ -370,7 +372,7 @@ export const LicensesPage = () => {
 
     {
 
-      title: 'Baslangic',
+      title: 'Başlangıç',
 
       dataIndex: 'startDate',
 
@@ -380,7 +382,7 @@ export const LicensesPage = () => {
 
     {
 
-      title: 'Bitis',
+      title: 'Bitiş',
 
       dataIndex: 'endDate',
 
@@ -426,7 +428,7 @@ export const LicensesPage = () => {
 
       render: (value: boolean) => (
 
-        <Tag color={value ? 'red' : 'default'}>{value ? 'Kilitle' : 'AÃ§Ä±k'}</Tag>
+        <Tag color={value ? 'red' : 'default'}>{value ? 'Kilitle' : 'Açık'}</Tag>
 
       ),
 
@@ -444,7 +446,7 @@ export const LicensesPage = () => {
 
         <Space>
 
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
 
             <Button icon={<EditOutlined />} onClick={() => void openEditModal(record.id)} />
 
@@ -468,7 +470,7 @@ export const LicensesPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Lisanslar YÃ¼kleniyor..." />;
+    return <LoadingState text="Lisanslar Yükleniyor..." />;
 
   }
 
@@ -504,7 +506,7 @@ export const LicensesPage = () => {
 
         title="Lisans Yönetimi"
 
-        description="Bayi ve uygulama bazında lisans sürelerini ve durumlarını yönetin."
+        description="Lisans kayıtlarını yönetin, yeni lisans ekleyin."
 
         actions={
 
@@ -540,7 +542,7 @@ export const LicensesPage = () => {
 
       <Modal
 
-        title={editingId ? 'Lisans Duzenle' : 'Yeni Lisans'}
+        title={editingId ? 'Lisansı Düzenle' : 'Yeni Lisans'}
 
         open={isModalOpen}
 
@@ -548,11 +550,11 @@ export const LicensesPage = () => {
 
         onOk={() => void handleSubmit()}
 
-        okText={editingId ? 'GÃ¼ncelle' : 'OluÅŸtur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
 
-        cancelText="Vazgec"
+        cancelText="Vazgeç"
 
-        width={780}
+        width={760}
 
       >
 
@@ -586,13 +588,13 @@ export const LicensesPage = () => {
 
                 name="dealerId"
 
-                rules={[{ required: true, message: 'Bayi SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Bayi Seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Bayi SeÃ§in"
+                  placeholder="Bayi Seçin"
 
                   options={dealerOptions}
 
@@ -614,13 +616,13 @@ export const LicensesPage = () => {
 
                 name="appId"
 
-                rules={[{ required: true, message: 'Uygulama SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Uygulama Seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Uygulama SeÃ§in"
+                  placeholder="Uygulama Seçin"
 
                   options={appOptions}
 
@@ -638,11 +640,11 @@ export const LicensesPage = () => {
 
               <Form.Item
 
-                label="Baslangic Tarihi"
+                label="Başlangıç Tarihi"
 
                 name="startDate"
 
-                rules={[{ required: true, message: 'Baslangic tarihi zorunludur.' }]}
+                rules={[{ required: true, message: 'Başlangıç tarihi zorunludur.' }]}
 
               >
 
@@ -656,7 +658,7 @@ export const LicensesPage = () => {
 
               <Form.Item
 
-                label="Bitis Tarihi"
+                label="Bitiş Tarihi"
 
                 name="endDate"
 
@@ -680,7 +682,7 @@ export const LicensesPage = () => {
 
                         return Promise.reject(
 
-                          new Error('Bitis tarihi baslangic tarihinden once olamaz.'),
+                          new Error('Bitiş tarihi başlangıç tarihinden önce olamaz.'),
 
                         );
 
@@ -722,7 +724,7 @@ export const LicensesPage = () => {
 
                         return Promise.reject(
 
-                          new Error('Periyot sÄ±fÄ±rdan bÃ¼yÃ¼k olmalidir.'),
+                          new Error('Periyot sıfırdan büyük olmalıdır.'),
 
                         );
 
@@ -774,7 +776,7 @@ export const LicensesPage = () => {
 
               >
 
-                <Switch checkedChildren="Evet" unCheckedChildren="HayÄ±r" />
+                <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
 
               </Form.Item>
 
@@ -792,7 +794,7 @@ export const LicensesPage = () => {
 
               >
 
-                <Switch checkedChildren="Kilitle" unCheckedChildren="AÃ§Ä±k" />
+                <Switch checkedChildren="Kilitle" unCheckedChildren="Açık" />
 
               </Form.Item>
 

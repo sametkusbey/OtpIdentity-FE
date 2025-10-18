@@ -106,13 +106,13 @@ export const DealersPage = () => {
 
   const createMutation = useCreateMutation<DealerFormValues>('dealers', {
 
-    successMessage: 'Bayi OluÅŸturuldu.',
+    successMessage: 'Bayi Oluşturuldu.',
 
   });
 
   const updateMutation = useUpdateMutation<DealerFormValues>('dealers', {
 
-    successMessage: 'Bayi GÃ¼ncellendi.',
+    successMessage: 'Bayi Güncellendi.',
 
   });
 
@@ -214,7 +214,7 @@ export const DealersPage = () => {
 
       okType: 'danger',
 
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
 
       centered: true,
 
@@ -240,7 +240,7 @@ export const DealersPage = () => {
 
             name: 'dealerCode',
 
-            errors: ['MÃ¼ÅŸteri olarak isaretlenen bayiler icin bayi kodu zorunludur.'],
+            errors: ['Müşteri olarak işaretlenen bayiler için bayi kodu zorunludur.'],
 
           },
 
@@ -332,7 +332,7 @@ export const DealersPage = () => {
 
       render: (value: boolean) => (
 
-        <Tag color={value ? 'green' : 'default'}>{value ? 'Evet' : 'HayÄ±r'}</Tag>
+        <Tag color={value ? 'green' : 'default'}>{value ? 'Evet' : 'Hayır'}</Tag>
 
       ),
 
@@ -350,7 +350,7 @@ export const DealersPage = () => {
 
     {
 
-      title: 'KullanÄ±cÄ± Sayisi',
+      title: 'Kullanıcı Sayısı',
 
       dataIndex: 'userIds',
 
@@ -394,7 +394,7 @@ export const DealersPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Bayiler YÃ¼kleniyor..." />;
+    return <LoadingState text="Bayiler Yükleniyor..." />;
 
   }
 
@@ -406,7 +406,7 @@ export const DealersPage = () => {
 
       <ErrorState
 
-        subtitle="Bayiler alinirken bir hata olustu."
+        subtitle="Bayiler alınırken bir hata oluştu."
 
         onRetry={() => {
 
@@ -430,7 +430,7 @@ export const DealersPage = () => {
 
         title="Bayi Yönetimi"
 
-        description="Şirket ve bayi KayÄ±tlarını yönetin, MÃ¼ÅŸteri bayileri işaretleyin."
+        description="Şirket ve bayi kayıtlarını yönetin, müşteri bayileri işaretleyin."
 
         actions={
 
@@ -466,7 +466,7 @@ export const DealersPage = () => {
 
       <Modal
 
-        title={editingId ? 'Bayiyi Duzenle' : 'Yeni Bayi'}
+        title={editingId ? 'Bayiyi Düzenle' : 'Yeni Bayi'}
 
         open={isModalOpen}
 
@@ -474,9 +474,9 @@ export const DealersPage = () => {
 
         onOk={() => void handleSubmit()}
 
-        okText={editingId ? 'GÃ¼ncelle' : 'OluÅŸtur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
 
-        cancelText="Vazgec"
+        cancelText="Vazgeç"
 
         width={760}
 
@@ -544,7 +544,7 @@ export const DealersPage = () => {
 
               >
 
-                <Input placeholder="Şirket unvani" />
+                <Input placeholder="Şirket unvanı" />
 
               </Form.Item>
 
@@ -660,7 +660,7 @@ export const DealersPage = () => {
 
                   { required: true, message: 'E-posta zorunludur.' },
 
-                  { type: 'email', message: 'GeÃ§erli bir e-posta girin.' },
+                  { type: 'email', message: 'Geçerli bir e-posta girin.' },
 
                   { max: 256, message: 'En fazla 256 karakter olmalidir.' },
 
@@ -690,7 +690,7 @@ export const DealersPage = () => {
 
                   >
 
-                    <Switch checkedChildren="Evet" unCheckedChildren="HayÄ±r" />
+                    <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
 
                   </Form.Item>
 
@@ -714,7 +714,7 @@ export const DealersPage = () => {
 
                             return Promise.reject(
 
-                              new Error('MÃ¼ÅŸteri bayileri icin bayi kodu gereklidir.'),
+                              new Error('Müşteri bayileri için bayi kodu gereklidir.'),
 
                             );
 
@@ -724,7 +724,7 @@ export const DealersPage = () => {
 
                             return Promise.reject(
 
-                              new Error('En fazla 64 karakter olmalidir.'),
+                              new Error('En fazla 64 karakter olmalıdır.'),
 
                             );
 
@@ -758,7 +758,7 @@ export const DealersPage = () => {
 
                   mode="multiple"
 
-                  placeholder="Kullanıcıları Seçin"
+                  placeholder="Kullanıcıları seçin"
 
                   options={userOptions}
 

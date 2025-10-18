@@ -120,7 +120,7 @@ export const AuthorizationsPage = () => {
 
     {
 
-      successMessage: 'Yetki OluÅŸturuldu.',
+      successMessage: 'Yetki Oluşturuldu.',
 
     },
 
@@ -132,7 +132,7 @@ export const AuthorizationsPage = () => {
 
     {
 
-      successMessage: 'Yetki GÃ¼ncellendi.',
+      successMessage: 'Yetki Güncellendi.',
 
     },
 
@@ -294,13 +294,13 @@ export const AuthorizationsPage = () => {
 
     modal.confirm({
 
-      title: 'Yetki KaydÄ±ni silmek istediginize emin misiniz?',
+      title: 'Yetki Kaydını silmek istediginize emin misiniz?',
 
       okText: 'Sil',
 
       okType: 'danger',
 
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
 
       centered: true,
 
@@ -340,7 +340,7 @@ export const AuthorizationsPage = () => {
 
             name: 'userId',
 
-            errors: ['Bu KullanÄ±cÄ± icin ayni yetki zaten mevcut.'],
+            errors: ['Bu Kullanıcı icin ayni yetki zaten mevcut.'],
 
           },
 
@@ -378,7 +378,7 @@ export const AuthorizationsPage = () => {
 
     {
 
-      title: 'KullanÄ±cÄ±',
+      title: 'Kullanıcı',
 
       dataIndex: 'userId',
 
@@ -424,7 +424,7 @@ export const AuthorizationsPage = () => {
 
         <Space>
 
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
 
             <Button icon={<EditOutlined />} onClick={() => void openEditModal(record.id)} />
 
@@ -448,7 +448,7 @@ export const AuthorizationsPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Yetkiler YÃ¼kleniyor..." />;
+    return <LoadingState text="Yetkiler Yükleniyor..." />;
 
   }
 
@@ -484,7 +484,7 @@ export const AuthorizationsPage = () => {
 
         title="Yetkilendirme Yönetimi"
 
-        description="KullanÄ±cÄ±, uygulama ve bayi kombinasyonlarını kontrol altinda tutun."
+        description="Kullanıcı, uygulama ve bayi kombinasyonlarını kontrol altında tutun."
 
         actions={
 
@@ -520,7 +520,7 @@ export const AuthorizationsPage = () => {
 
       <Modal
 
-        title={editingId ? 'Yetkiyi Duzenle' : 'Yeni Yetki'}
+        title={editingId ? 'Yetkiyi Düzenle' : 'Yeni Yetki'}
 
         open={isModalOpen}
 
@@ -528,9 +528,9 @@ export const AuthorizationsPage = () => {
 
         onOk={() => void handleSubmit()}
 
-        okText={editingId ? 'GÃ¼ncelle' : 'OluÅŸtur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
 
-        cancelText="Vazgec"
+        cancelText="Vazgeç"
 
         width={600}
 
@@ -544,17 +544,17 @@ export const AuthorizationsPage = () => {
 
               <Form.Item
 
-                label="KullanÄ±cÄ±"
+                label="Kullanıcı"
 
                 name="userId"
 
-                rules={[{ required: true, message: 'KullanÄ±cÄ± SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Kullanıcı seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="KullanÄ±cÄ± SeÃ§in"
+                  placeholder="Kullanıcı seçin"
 
                   options={userOptions}
 
@@ -576,13 +576,13 @@ export const AuthorizationsPage = () => {
 
                 name="appId"
 
-                rules={[{ required: true, message: 'Uygulama SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Uygulama seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Uygulama SeÃ§in"
+                  placeholder="Uygulama seçin"
 
                   options={appOptions}
 
@@ -604,13 +604,13 @@ export const AuthorizationsPage = () => {
 
                 name="dealerId"
 
-                rules={[{ required: true, message: 'Bayi SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Bayi seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Bayi SeÃ§in"
+                  placeholder="Bayi seçin"
 
                   options={dealerOptions}
 

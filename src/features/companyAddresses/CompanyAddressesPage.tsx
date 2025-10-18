@@ -138,7 +138,7 @@ export const CompanyAddressesPage = () => {
 
     {
 
-      successMessage: 'Adres OluÅŸturuldu.',
+      successMessage: 'Adres Oluşturuldu.',
 
     },
 
@@ -150,7 +150,7 @@ export const CompanyAddressesPage = () => {
 
     {
 
-      successMessage: 'Adres GÃ¼ncellendi.',
+      successMessage: 'Adres Güncellendi.',
 
     },
 
@@ -292,13 +292,13 @@ export const CompanyAddressesPage = () => {
 
     modal.confirm({
 
-      title: 'Adres KaydÄ±ni silmek istediginize emin misiniz?',
+      title: 'Adres Kaydını silmek istediginize emin misiniz?',
 
       okText: 'Sil',
 
       okType: 'danger',
 
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
 
       centered: true,
 
@@ -372,7 +372,7 @@ export const CompanyAddressesPage = () => {
 
     {
 
-      title: 'Adres Adi',
+      title: 'Adres Adı',
 
       dataIndex: 'addressName',
 
@@ -380,7 +380,7 @@ export const CompanyAddressesPage = () => {
 
     {
 
-      title: 'Ãœlke',
+      title: 'Ülke',
 
       dataIndex: 'country',
 
@@ -434,7 +434,7 @@ export const CompanyAddressesPage = () => {
 
     {
 
-      title: 'e-Ä°rsaliye',
+      title: 'e-İrsaliye',
 
       dataIndex: 'isEWaybillTaxpayer',
 
@@ -458,7 +458,7 @@ export const CompanyAddressesPage = () => {
 
         <Space>
 
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
 
             <Button icon={<EditOutlined />} onClick={() => void openEditModal(record.id)} />
 
@@ -482,7 +482,7 @@ export const CompanyAddressesPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Adresler YÃ¼kleniyor..." />;
+    return <LoadingState text="Adresler Yükleniyor..." />;
 
   }
 
@@ -516,9 +516,9 @@ export const CompanyAddressesPage = () => {
 
       <PageHeader
 
-        title="Şirket Adresleri"
+        title="Şirket Adresleri Yönetimi"
 
-        description="Bayilerin fatura ve irsaliye adreslerini detayli sekilde kaydedin."
+        description="Şirket adreslerini yönetin, yeni adres ekleyin."
 
         actions={
 
@@ -554,7 +554,7 @@ export const CompanyAddressesPage = () => {
 
       <Modal
 
-        title={editingId ? 'Adresi Duzenle' : 'Yeni Adres'}
+        title={editingId ? 'Adresi Düzenle' : 'Yeni Adres'}
 
         open={isModalOpen}
 
@@ -562,11 +562,11 @@ export const CompanyAddressesPage = () => {
 
         onOk={() => void handleSubmit()}
 
-        okText={editingId ? 'GÃ¼ncelle' : 'OluÅŸtur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
 
-        cancelText="Vazgec"
+        cancelText="Vazgeç"
 
-        width={860}
+        width={600}
 
       >
 
@@ -596,13 +596,13 @@ export const CompanyAddressesPage = () => {
 
                 name="dealerId"
 
-                rules={[{ required: true, message: 'Bayi SeÃ§imi zorunludur.' }]}
+                rules={[{ required: true, message: 'Bayi Seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Bayi SeÃ§in"
+                  placeholder="Bayi Seçin"
 
                   options={dealerOptions}
 
@@ -620,13 +620,13 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="Adres Adi"
+                label="Adres Adı"
 
                 name="addressName"
 
                 rules={[
 
-                  { required: true, message: 'Adres adi zorunludur.' },
+                  { required: true, message: 'Adres adı zorunludur.' },
 
                   { max: 128, message: 'En fazla 128 karakter olmalidir.' },
 
@@ -634,7 +634,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input placeholder="Merkez, Depo vb." />
+                <Input placeholder="Adres adı girin" />
 
               </Form.Item>
 
@@ -644,13 +644,13 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="Ãœlke"
+                label="Ülke"
 
                 name="country"
 
                 rules={[
 
-                  { required: true, message: 'Ãœlke zorunludur.' },
+                  { required: true, message: 'Ülke zorunludur.' },
 
                   { max: 64, message: 'En fazla 64 karakter olmalidir.' },
 
@@ -658,7 +658,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input placeholder="Turkiye" />
+                <Input placeholder="Ülke girin" />
 
               </Form.Item>
 
@@ -682,7 +682,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="Şehir girin" />
 
               </Form.Item>
 
@@ -706,7 +706,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="İlçe girin" />
 
               </Form.Item>
 
@@ -748,7 +748,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="Cadde/Sokak girin" />
 
               </Form.Item>
 
@@ -772,7 +772,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input />
+                <Input placeholder="Posta kodu girin" />
 
               </Form.Item>
 
@@ -782,7 +782,7 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="Apartman Adi"
+                label="Apartman Adı"
 
                 name="apartmentName"
 
@@ -818,7 +818,7 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="Kapi No"
+                label="Kapı No"
 
                 name="doorNumber"
 
@@ -842,7 +842,7 @@ export const CompanyAddressesPage = () => {
 
                 rules={[
 
-                  { type: 'email', message: 'GeÃ§erli bir e-posta adresi girin.' },
+                  { type: 'email', message: 'Geçerli bir e-posta adresi girin.' },
 
                   { max: 256, message: 'En fazla 256 karakter olmalidir.' },
 
@@ -866,7 +866,7 @@ export const CompanyAddressesPage = () => {
 
                 rules={[
 
-                  { type: 'url', message: 'GeÃ§erli bir URL girin.' },
+                  { type: 'url', message: 'Geçerli bir URL girin.' },
 
                   { max: 256, message: 'En fazla 256 karakter olmalidir.' },
 
@@ -874,7 +874,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Input placeholder="https://..." />
+                <Input placeholder="Web sitesi girin" />
 
               </Form.Item>
 
@@ -892,7 +892,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Switch checkedChildren="Evet" unCheckedChildren="HayÄ±r" />
+                <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
 
               </Form.Item>
 
@@ -900,7 +900,7 @@ export const CompanyAddressesPage = () => {
 
             <Col xs={24} md={12}>
 
-              <Form.Item label="e-Fatura GeÃ§iÅŸ Tarihi" name="eInvoiceTransitionDate">
+              <Form.Item label="e-Fatura Geçiş Tarihi" name="eInvoiceTransitionDate">
 
                 <DatePicker format="DD.MM.YYYY" style={{ width: '100%' }} allowClear />
 
@@ -930,7 +930,7 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="e-Ä°rsaliye Mukellefi"
+                label="e-İrsaliye Mukellefi"
 
                 name="isEWaybillTaxpayer"
 
@@ -938,7 +938,7 @@ export const CompanyAddressesPage = () => {
 
               >
 
-                <Switch checkedChildren="Evet" unCheckedChildren="HayÄ±r" />
+                <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
 
               </Form.Item>
 
@@ -946,7 +946,7 @@ export const CompanyAddressesPage = () => {
 
             <Col xs={24} md={12}>
 
-              <Form.Item label="e-Ä°rsaliye GeÃ§iÅŸ Tarihi" name="eWaybillTransitionDate">
+              <Form.Item label="e-İrsaliye Geçiş Tarihi" name="eWaybillTransitionDate">
 
                 <DatePicker format="DD.MM.YYYY" style={{ width: '100%' }} allowClear />
 
@@ -958,7 +958,7 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="e-Ä°rsaliye Alias"
+                label="e-İrsaliye Alias"
 
                 name="eWaybillAlias"
 

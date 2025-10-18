@@ -94,13 +94,13 @@ export const ProgramsPage = () => {
 
   const createMutation = useCreateMutation<ProgramFormValues>('programs', {
 
-    successMessage: 'Program OluÅŸturuldu.',
+    successMessage: 'Program Oluşturuldu.',
 
   });
 
   const updateMutation = useUpdateMutation<ProgramFormValues>('programs', {
 
-    successMessage: 'Program GÃ¼ncellendi.',
+    successMessage: 'Program Güncellendi.',
 
   });
 
@@ -162,13 +162,13 @@ export const ProgramsPage = () => {
 
     modal.confirm({
 
-      title: 'Programi silmek istediginize emin misiniz?',
+      title: 'Programı silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
       okType: 'danger',
 
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
 
       centered: true,
 
@@ -222,7 +222,7 @@ export const ProgramsPage = () => {
 
     {
 
-      title: 'Program Adi',
+      title: 'Program Adı',
 
       dataIndex: 'programName',
 
@@ -230,7 +230,7 @@ export const ProgramsPage = () => {
 
     {
 
-      title: 'Ä°ÅŸlemler',
+      title: 'İşlemler',
 
       key: 'actions',
 
@@ -240,7 +240,7 @@ export const ProgramsPage = () => {
 
         <Space>
 
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
 
             <Button icon={<EditOutlined />} onClick={() => void openEditModal(record.id)} />
 
@@ -264,7 +264,7 @@ export const ProgramsPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Programlar YÃ¼kleniyor..." />;
+    return <LoadingState text="Programlar Yükleniyor..." />;
 
   }
 
@@ -276,7 +276,7 @@ export const ProgramsPage = () => {
 
       <ErrorState
 
-        subtitle="Programlar alinirken bir hata olustu."
+        subtitle="Programlar alınırken bir hata oluştu."
 
         onRetry={() => {
 
@@ -297,26 +297,18 @@ export const ProgramsPage = () => {
     <>
 
       <PageHeader
-
         title="Program Yönetimi"
-
-        description="Harici sistem programlarını kaydedin ve kodlarını takip edin."
-
-        actions={
-
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-
+        description="Program kayıtlarını yönetin, yeni program ekleyin."
+        actions={[
+          <Button key="create" type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
             Yeni Program
-
           </Button>
-
-        }
-
+        ]}
       />
 
 
 
-      <SurfaceCard>
+      <SurfaceCard style={{ maxWidth: 1200, width: '100%' }}>
 
         <Table<ProgramDto>
 
@@ -336,7 +328,7 @@ export const ProgramsPage = () => {
 
       <Modal
 
-        title={editingId ? 'Programi Duzenle' : 'Yeni Program'}
+        title={editingId ? 'Programı Düzenle' : 'Yeni Program'}
 
         open={isModalOpen}
 
@@ -348,9 +340,9 @@ export const ProgramsPage = () => {
 
         }}
 
-        okText={editingId ? 'GÃ¼ncelle' : 'OluÅŸtur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
 
-        cancelText="Vazgec"
+        cancelText="Vazgeç"
 
         width={520}
 
@@ -368,33 +360,33 @@ export const ProgramsPage = () => {
 
               { required: true, message: 'Kod zorunludur.' },
 
-              { max: 32, message: 'En fazla 32 karakter olmalidir.' },
+              { max: 32, message: 'En fazla 32 karakter olmalıdır.' },
 
             ]}
 
           >
 
-            <Input placeholder="Orn. SAP" />
+            <Input placeholder="Örn. SAP" />
 
           </Form.Item>
 
           <Form.Item
 
-            label="Program Adi"
+            label="Program Adı"
 
             name="programName"
 
             rules={[
 
-              { required: true, message: 'Program adi zorunludur.' },
+              { required: true, message: 'Program adı zorunludur.' },
 
-              { max: 128, message: 'En fazla 128 karakter olmalidir.' },
+              { max: 128, message: 'En fazla 128 karakter olmalıdır.' },
 
             ]}
 
           >
 
-            <Input placeholder="Program adi" />
+            <Input placeholder="Program adı" />
 
           </Form.Item>
 
