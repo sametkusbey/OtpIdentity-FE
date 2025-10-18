@@ -10,10 +10,6 @@ import {
 
 import { Avatar, Button, Flex, Layout, Space, Typography } from 'antd';
 
-import { useLocation } from 'react-router-dom';
-
-import { navigationItems } from '@/constants/navigation';
-
 import { useAuth } from '@/features/auth/AuthContext';
 
 
@@ -30,17 +26,7 @@ type TopBarProps = {
 
 export const TopBar = ({ collapsed, onToggle }: TopBarProps) => {
 
-  const location = useLocation();
-
   const { user, logout } = useAuth();
-
-
-
-  const activeItem =
-
-    navigationItems.find((item) => item.path === location.pathname) ??
-
-    navigationItems[0];
 
 
 
