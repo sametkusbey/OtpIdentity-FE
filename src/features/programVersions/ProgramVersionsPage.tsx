@@ -45,6 +45,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import {
 
@@ -73,6 +74,7 @@ import type {
 } from '@/types/entities';
 
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 
 
@@ -258,6 +260,12 @@ export const ProgramVersionsPage = () => {
 
 
 
+  const [search, setSearch] = useState('');
+  const filteredProgramVersions = useMemo(
+    () => filterByQuery(programVersions, search),
+    [programVersions, search],
+  );
+
   const columns: ColumnsType<ProgramVersionDto> = [
 
     {
@@ -375,19 +383,13 @@ export const ProgramVersionsPage = () => {
 
 
       <SurfaceCard>
-
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<ProgramVersionDto>
-
           rowKey="id"
-
-          dataSource={programVersions}
-
+          dataSource={filteredProgramVersions}
           columns={columns}
-
-          pagination={{ pageSize: 10 }}
-
+          pagination={{ pageSize: 8 }}
         />
-
       </SurfaceCard>
 
 

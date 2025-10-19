@@ -45,6 +45,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import {
 
@@ -79,6 +80,7 @@ import type {
 import type { ApiError } from '@/lib/apiClient';
 
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 
 
@@ -153,6 +155,12 @@ export const ConnectionsPage = () => {
   }, [form, isModalOpen]);
 
 
+
+  const [search, setSearch] = useState('');
+  const filteredConnections = useMemo(
+    () => filterByQuery(connections, search),
+    [connections, search],
+  );
 
   const dealerOptions = useMemo(
 
@@ -543,19 +551,13 @@ export const ConnectionsPage = () => {
 
 
       <SurfaceCard>
-
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<ConnectionDto>
-
           rowKey="id"
-
-          dataSource={connections}
-
+          dataSource={filteredConnections}
           columns={columns}
-
-          pagination={{ pageSize: 10 }}
-
+          pagination={{ pageSize: 8 }}
         />
-
       </SurfaceCard>
 
 

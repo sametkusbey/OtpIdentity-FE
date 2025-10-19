@@ -24,6 +24,7 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 import {
   fetchEntityById,
   useCreateMutation,
@@ -34,6 +35,7 @@ import {
 import type { ApiError } from '@/lib/apiClient';
 import type { AppDto, DealerDto, Guid, UserDto } from '@/types/entities';
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 type UserFormValues = Omit<UserDto, 'id'>;
 
@@ -138,6 +140,9 @@ export const UsersPage = () => {
       applyValidationErrors(apiError, form);
     }
   };
+
+  const [search, setSearch] = useState('');
+  const filteredUsers = useMemo(() => filterByQuery(users, search), [users, search]);
 
   const columns: ColumnsType<UserDto> = [
     {
@@ -244,11 +249,12 @@ export const UsersPage = () => {
         }
       />
       <SurfaceCard>
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<UserDto>
           rowKey="id"
-          dataSource={users}
+          dataSource={filteredUsers}
           columns={columns}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 8 }}
         />
       </SurfaceCard>
       <Modal

@@ -49,6 +49,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import {
 
@@ -69,6 +70,7 @@ import type { ApiError } from '@/lib/apiClient';
 import type { DealerDto, Guid, UserDto } from '@/types/entities';
 
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 
 
@@ -274,6 +276,9 @@ export const DealersPage = () => {
 
 
 
+  const [search, setSearch] = useState('');
+  const filteredDealers = useMemo(() => filterByQuery(dealers, search), [dealers, search]);
+
   const columns: ColumnsType<DealerDto> = [
 
     {
@@ -447,19 +452,13 @@ export const DealersPage = () => {
 
 
       <SurfaceCard>
-
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<DealerDto>
-
           rowKey="id"
-
-          dataSource={dealers}
-
+          dataSource={filteredDealers}
           columns={columns}
-
-          pagination={{ pageSize: 10 }}
-
+          pagination={{ pageSize: 8 }}
         />
-
       </SurfaceCard>
 
 

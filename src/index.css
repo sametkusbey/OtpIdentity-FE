@@ -33,7 +33,7 @@ a {
 
 .page-shell {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1480px;
   margin: 0 auto;
   padding: 32px 28px 48px;
   display: flex;
@@ -76,6 +76,11 @@ a {
 
 .ant-btn-primary {
   box-shadow: none;
+}
+
+/* Slightly taller primary action in page headers */
+.page-header-actions .ant-btn-primary {
+  height: 45px;
 }
 
 .ant-card {

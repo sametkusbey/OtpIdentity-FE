@@ -30,7 +30,7 @@ import {
 
 import type { ColumnsType } from 'antd/es/table';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { LoadingState } from '@/components/feedback/LoadingState';
 
@@ -39,6 +39,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import {
 
@@ -59,6 +60,7 @@ import type { ApiError } from '@/lib/apiClient';
 import type { AppDto, Guid } from '@/types/entities';
 
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 
 
@@ -210,6 +212,10 @@ export const AppsPage = () => {
 
 
 
+  const [search, setSearch] = useState('');
+  const filteredApps = useMemo(() => filterByQuery(apps, search), [apps, search]);
+
+
   const columns: ColumnsType<AppDto> = [
 
     {
@@ -317,19 +323,13 @@ export const AppsPage = () => {
 
 
       <SurfaceCard>
-
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<AppDto>
-
           rowKey="id"
-
-          dataSource={apps}
-
+          dataSource={filteredApps}
           columns={columns}
-
-          pagination={{ pageSize: 10 }}
-
+          pagination={{ pageSize: 8 }}
         />
-
       </SurfaceCard>
 
 

@@ -23,6 +23,10 @@ export const PageHeader = ({ title, description, actions }: PageHeaderProps) => 
         <Typography.Text type="secondary">{description}</Typography.Text>
       ) : null}
     </Space>
-    {actions ? <Space wrap size={12}>{actions}</Space> : null}
+    {actions ? (
+      <Space className="page-header-actions" wrap size={12}>
+        {actions}
+      </Space>
+    ) : null}
   </Flex>
 );

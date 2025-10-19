@@ -53,6 +53,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import {
 
@@ -87,6 +88,7 @@ import type { ApiError } from '@/lib/apiClient';
 import { formatDate } from '@/utils/formatters';
 
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 
 
@@ -346,6 +348,9 @@ export const LicensesPage = () => {
 
 
 
+  const [search, setSearch] = useState('');
+  const filteredLicenses = useMemo(() => filterByQuery(licenses, search), [licenses, search]);
+
   const columns: ColumnsType<LicenseDto> = [
 
     {
@@ -521,19 +526,13 @@ export const LicensesPage = () => {
 
 
       <SurfaceCard>
-
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<LicenseDto>
-
           rowKey="id"
-
-          dataSource={licenses}
-
+          dataSource={filteredLicenses}
           columns={columns}
-
-          pagination={{ pageSize: 10 }}
-
+          pagination={{ pageSize: 8 }}
         />
-
       </SurfaceCard>
 
 

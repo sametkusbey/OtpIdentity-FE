@@ -30,7 +30,7 @@ import {
 
 import type { ColumnsType } from 'antd/es/table';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { LoadingState } from '@/components/feedback/LoadingState';
 
@@ -39,6 +39,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 import { SurfaceCard } from '@/components/layout/SurfaceCard';
+import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import {
 
@@ -59,6 +60,7 @@ import type { ApiError } from '@/lib/apiClient';
 import type { Guid, ProgramDto } from '@/types/entities';
 
 import { applyValidationErrors } from '@/utils/form';
+import { filterByQuery } from '@/utils/filter';
 
 
 
@@ -210,6 +212,9 @@ export const ProgramsPage = () => {
 
 
 
+  const [search, setSearch] = useState('');
+  const filteredPrograms = useMemo(() => filterByQuery(programs, search), [programs, search]);
+
   const columns: ColumnsType<ProgramDto> = [
 
     {
@@ -308,20 +313,14 @@ export const ProgramsPage = () => {
 
 
 
-      <SurfaceCard style={{ maxWidth: 1200, width: '100%' }}>
-
+      <SurfaceCard style={{ width: '100%' }}>
+        <TableFilterBar value={search} onChange={setSearch} />
         <Table<ProgramDto>
-
           rowKey="id"
-
-          dataSource={programs}
-
+          dataSource={filteredPrograms}
           columns={columns}
-
-          pagination={{ pageSize: 10 }}
-
+          pagination={{ pageSize: 8 }}
         />
-
       </SurfaceCard>
 
 

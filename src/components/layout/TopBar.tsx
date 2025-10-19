@@ -73,8 +73,6 @@ export const TopBar = ({ collapsed, onToggle }: TopBarProps) => {
 
             borderRadius: 14,
 
-            backgroundColor: 'rgba(6, 146, 62, 0.08)',
-
           }}
 
         />
