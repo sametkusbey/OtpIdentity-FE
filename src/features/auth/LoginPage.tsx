@@ -1,4 +1,4 @@
-import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+﻿import { LockOutlined, UserOutlined } from '@ant-design/icons';
 
 import {
 
@@ -31,18 +31,12 @@ import { useLocation, useNavigate, type Location } from 'react-router-dom';
 import { primaryColor, secondaryColor } from '@/config/theme';
 
 import { useAuth } from './AuthContext';
+import { showErrorToast } from '@/lib/toast';
+import { portalLogin } from '@/features/portalAuth/api';
 
 
 
-type FormValues = {
-
-  email?: string;
-
-  password?: string;
-
-  name?: string;
-
-};
+type FormValues = { username: string; password: string };
 
 
 
@@ -61,21 +55,19 @@ export const LoginPage = () => {
 
 
   const handleFinish = useCallback(
-
-    (values: FormValues) => {
-
-      login({ email: values.email, name: values.name });
-
-      const redirectPath =
-
-        (location.state as { from?: Location })?.from?.pathname ?? '/';
-
-      navigate(redirectPath, { replace: true });
-
+    async (values: FormValues) => {
+      try {
+        const account = await portalLogin(values.username, values.password);
+        login({ id: (account as any).id, name: account.username, menus: (account as any).menus });
+        const redirectPath = (location.state as { from?: Location })?.from?.pathname ?? '/';
+        navigate(redirectPath, { replace: true });
+      } catch (e) {
+        const err = e as { message?: string } | undefined;
+        const message = err?.message && err.message.trim() !== '' ? err.message : 'Giriş başarısız. Sunucuya erişilemedi (CORS/SSL).';
+        showErrorToast(message);
+      }
     },
-
     [location.state, login, navigate],
-
   );
 
 
@@ -122,11 +114,7 @@ export const LoginPage = () => {
 
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
 
-          <Typography.Text type="secondary" style={{ textAlign: 'center', letterSpacing: 1.8 }}>
-
-            OTPIDENTITY
-
-          </Typography.Text>
+      
 
           <Typography.Title
 
@@ -142,7 +130,7 @@ export const LoginPage = () => {
 
           <Typography.Paragraph style={{ textAlign: 'center', marginBottom: 0 }}>
 
-            Yönetim paneline erisim icin bilgilerinizi girin.
+            Yönetim paneline erişim için bilgilerinizi girin.
 
           </Typography.Paragraph>
 
@@ -156,33 +144,15 @@ export const LoginPage = () => {
 
           style={{ marginTop: 32 }}
 
-          initialValues={{ email: '', password: '', name: '' }}
+          initialValues={{ username: '', password: '' }}
 
         >
 
-          <Form.Item label="Adınız" name="name">
-
-            <Input prefix={<UserOutlined />} placeholder="Orn. Admin Kullanıcı" size="large" />
-
+          <Form.Item label="Kullanıcı Adı" name="username" rules={[{ required: true, message: 'Kullanıcı adı zorunludur.' }]}>
+            <Input prefix={<UserOutlined />} placeholder="kullanıcı adı" size="large" />
           </Form.Item>
 
-          <Form.Item label="E-posta" name="email">
-
-            <Input
-
-              prefix={<MailOutlined />}
-
-              type="email"
-
-              placeholder="ornek@otpbilisim.com"
-
-              size="large"
-
-            />
-
-          </Form.Item>
-
-          <Form.Item label="Şifre" name="password">
+          <Form.Item label="Şifre" name="password" rules={[{ required: true, message: 'Şifre zorunludur.' }]}>
 
             <Input.Password prefix={<LockOutlined />} placeholder="***" size="large" />
 
@@ -228,7 +198,7 @@ export const LoginPage = () => {
 
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
 
-                Â© {currentYear} Otp Bilisim Identity Server
+                © {currentYear} Otp Bilişim Identity Server
 
               </Typography.Text>
 
@@ -245,6 +215,8 @@ export const LoginPage = () => {
   );
 
 };
+
+
 
 
 

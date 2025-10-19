@@ -1,0 +1,26 @@
+﻿*** Begin Patch
+*** Update File: src/features/portalAuth/api.ts
+@@
+ export async function listPortalMenus(): Promise<PortalMenuDto[]> {
+@@
+   return [];
+ }
++
++export async function getPortalAccountMenus(id: string): Promise<PortalMenuDto[]> {
++  const res = await apiClient.get<Result<PortalMenuDto[]> | PortalMenuDto[]>(
++    /portalaccounts//menus,
++  );
++  const payload = res.data as unknown;
++  if (Array.isArray(payload)) return payload as PortalMenuDto[];
++  if (
++    payload &&
++    typeof payload === 'object' &&
++    'succeeded' in (payload as Result<PortalMenuDto[]>)
++  ) {
++    const r = payload as Result<PortalMenuDto[]>;
++    if (!r.succeeded) throw new Error(r.message ?? 'Kullanici menuleri alinamadi');
++    return (r.data ?? []) as PortalMenuDto[];
++  }
++  return [];
++}
+*** End Patch

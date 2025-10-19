@@ -14,25 +14,30 @@ import { AuthorizationsPage } from '@/features/authorizations/AuthorizationsPage
 import { ConnectionsPage } from '@/features/connections/ConnectionsPage';
 import { CompanyAddressesPage } from '@/features/companyAddresses/CompanyAddressesPage';
 import { CompanyRepresentativesPage } from '@/features/companyRepresentatives/CompanyRepresentativesPage';
+import { GeneralSettingsPage } from '@/features/settings/GeneralSettingsPage';
+import { RequireMenu } from '@/features/auth/RequireMenu';
+import { ForbiddenPage } from '@/features/errors/ForbiddenPage';
 
 const App = () => (
   <Routes>
     <Route path="/giris" element={<LoginPage />} />
     <Route element={<ProtectedRoute />}>
       <Route element={<AppLayout />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="/kullanicilar" element={<UsersPage />} />
-        <Route path="/bayiler" element={<DealersPage />} />
-        <Route path="/uygulamalar" element={<AppsPage />} />
-        <Route path="/programlar" element={<ProgramsPage />} />
-        <Route path="/program-surumleri" element={<ProgramVersionsPage />} />
-        <Route path="/lisanslar" element={<LicensesPage />} />
-        <Route path="/yetkilendirmeler" element={<AuthorizationsPage />} />
-        <Route path="/baglantilar" element={<ConnectionsPage />} />
-        <Route path="/sirket-adresleri" element={<CompanyAddressesPage />} />
-        <Route path="/sirket-temsilcileri" element={<CompanyRepresentativesPage />} />
+        <Route index element={<RequireMenu code="dashboard"><DashboardPage /></RequireMenu>} />
+        <Route path="/kullanicilar" element={<RequireMenu code="users"><UsersPage /></RequireMenu>} />
+        <Route path="/bayiler" element={<RequireMenu code="dealers"><DealersPage /></RequireMenu>} />
+        <Route path="/uygulamalar" element={<RequireMenu code="apps"><AppsPage /></RequireMenu>} />
+        <Route path="/programlar" element={<RequireMenu code="programs"><ProgramsPage /></RequireMenu>} />
+        <Route path="/program-surumleri" element={<RequireMenu code="programVersions"><ProgramVersionsPage /></RequireMenu>} />
+        <Route path="/lisanslar" element={<RequireMenu code="licenses"><LicensesPage /></RequireMenu>} />
+        <Route path="/yetkilendirmeler" element={<RequireMenu code="authorizations"><AuthorizationsPage /></RequireMenu>} />
+        <Route path="/baglantilar" element={<RequireMenu code="connections"><ConnectionsPage /></RequireMenu>} />
+        <Route path="/sirket-adresleri" element={<RequireMenu code="companyAddresses"><CompanyAddressesPage /></RequireMenu>} />
+        <Route path="/sirket-temsilcileri" element={<RequireMenu code="companyRepresentatives"><CompanyRepresentativesPage /></RequireMenu>} />
+        <Route path="/genel-ayarlar" element={<RequireMenu code="generalSettings"><GeneralSettingsPage /></RequireMenu>} />
       </Route>
     </Route>
+    <Route path="/403" element={<ForbiddenPage />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );
