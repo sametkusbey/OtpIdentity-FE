@@ -337,15 +337,13 @@ export const DashboardPage = () => {
 
           <Typography.Title level={4} style={{ margin: 0 }}>
 
-            Geliştirme Notu
+            OTP Bilişim Identity Server Kontrol Paneli
 
           </Typography.Title>
 
           <Typography.Text>
 
-            Dashboard ekranini Geliştirirken backend ekibinden ek Özet endpointleri
-
-            talep edebilirsiniz. Su an icin temel toplam sayilar kullanilmaktadir.
+           Buraya henüz içerik eklenmedi.
 
           </Typography.Text>
 
