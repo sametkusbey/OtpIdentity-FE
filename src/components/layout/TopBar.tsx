@@ -95,11 +95,11 @@ export const TopBar = ({ collapsed, onToggle }: TopBarProps) => {
 
         <Space direction="vertical" size={0}>
 
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          {/* <Typography.Text type="secondary" style={{ fontSize: 12 }}>
 
             Hoş geldiniz
 
-          </Typography.Text>
+          </Typography.Text> */}
 
        
 
