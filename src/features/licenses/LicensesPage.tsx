@@ -1,4 +1,4 @@
-﻿import {
+import {
 
   DeleteOutlined,
 
@@ -19,8 +19,6 @@ import {
   DatePicker,
 
   Form,
-
-  Input,
 
   InputNumber,
 
