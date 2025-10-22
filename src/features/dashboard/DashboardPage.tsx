@@ -221,7 +221,7 @@ export const DashboardPage = () => {
 
       <ErrorState
 
-        subtitle="Özet verileri alirken bir problem yasandi."
+        subtitle="Özet verileri alırken bir problem yaşandı."
 
         onRetry={() => {
 
@@ -247,7 +247,7 @@ export const DashboardPage = () => {
 
         title="Kontrol Paneli"
 
-        description="OtpIdentity altyapisina ait ana metrikleri tek bakista Görüntüleyin."
+        description="OtpIdentity altyapısına ait ana metrikleri tek bakışta Görüntüleyin."
 
       />
 

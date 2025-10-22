@@ -1,23 +1,14 @@
 ﻿import { LockOutlined, UserOutlined } from '@ant-design/icons';
 
 import {
-
   Button,
-
   Card,
-
   Col,
-
   Flex,
-
   Form,
-
   Input,
-
   Row,
-
   Space,
-
   Typography,
 
 } from 'antd';
@@ -124,7 +115,7 @@ export const LoginPage = () => {
 
           >
 
-            Identity Server Paneli
+            OTP Bilişim Identity Server
 
           </Typography.Title>
 
@@ -154,7 +145,7 @@ export const LoginPage = () => {
 
           <Form.Item label="Şifre" name="password" rules={[{ required: true, message: 'Şifre zorunludur.' }]}>
 
-            <Input.Password prefix={<LockOutlined />} placeholder="***" size="large" />
+            <Input.Password prefix={<LockOutlined />} placeholder="**********" size="large" />
 
           </Form.Item>
 
