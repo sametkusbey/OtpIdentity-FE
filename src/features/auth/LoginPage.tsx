@@ -10,6 +10,7 @@ import {
   Row,
   Space,
   Typography,
+  Checkbox,
 
 } from 'antd';
 
@@ -27,7 +28,7 @@ import { portalLogin } from '@/features/portalAuth/api';
 
 
 
-type FormValues = { username: string; password: string };
+type FormValues = { username: string; password: string; rememberMe?: boolean };
 
 
 
@@ -43,6 +44,38 @@ export const LoginPage = () => {
 
   const location = useLocation();
 
+  const REMEMBER_KEY = 'otpidentity_remember';
+
+  const readRemember = (): { enabled: boolean; username?: string } => {
+    try {
+      const raw = localStorage.getItem(REMEMBER_KEY);
+      if (raw) {
+        const obj = JSON.parse(raw) as { enabled?: boolean; username?: string };
+        return { enabled: !!obj.enabled, username: obj.username };
+      }
+    } catch {
+      // ignore
+    }
+    return { enabled: false };
+  };
+
+  const persistRemember = (enabled: boolean, username?: string) => {
+    try {
+      if (enabled) {
+        localStorage.setItem(
+          REMEMBER_KEY,
+          JSON.stringify({ enabled: true, username: username ?? '' }),
+        );
+      } else {
+        localStorage.removeItem(REMEMBER_KEY);
+      }
+    } catch {
+      // storage might be blocked; ignore
+    }
+  };
+
+  const remembered = readRemember();
+
 
 
   const handleFinish = useCallback(
@@ -50,6 +83,8 @@ export const LoginPage = () => {
       try {
         const account = await portalLogin(values.username, values.password);
         login({ id: (account as any).id, name: account.username, menus: (account as any).menus });
+        // Remember username if user opted in (do not store password)
+        persistRemember(!!values.rememberMe, values.username);
         const redirectPath = (location.state as { from?: Location })?.from?.pathname ?? '/';
         navigate(redirectPath, { replace: true });
       } catch (e) {
@@ -135,7 +170,7 @@ export const LoginPage = () => {
 
           style={{ marginTop: 32 }}
 
-          initialValues={{ username: '', password: '' }}
+          initialValues={{ username: remembered.username ?? '', password: '', rememberMe: remembered.enabled }}
 
         >
 
@@ -147,6 +182,10 @@ export const LoginPage = () => {
 
             <Input.Password prefix={<LockOutlined />} placeholder="**********" size="large" />
 
+          </Form.Item>
+
+          <Form.Item name="rememberMe" valuePropName="checked" style={{ marginBottom: 12 }}>
+            <Checkbox>Beni hatırla</Checkbox>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0 }}>
