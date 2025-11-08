@@ -6,9 +6,11 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { UsersPage } from '@/features/users/UsersPage';
 import { DealersPage } from '@/features/dealers/DealersPage';
+import { CustomersPage } from '@/features/customers/CustomersPage';
 import { AppsPage } from '@/features/apps/AppsPage';
 import { ProgramsPage } from '@/features/programs/ProgramsPage';
 import { ProgramVersionsPage } from '@/features/programVersions/ProgramVersionsPage';
+import { ProgramEditionsPage } from '@/features/programEditions/ProgramEditionsPage';
 import { LicensesPage } from '@/features/licenses/LicensesPage';
 import { AuthorizationsPage } from '@/features/authorizations/AuthorizationsPage';
 import { ConnectionsPage } from '@/features/connections/ConnectionsPage';
@@ -26,9 +28,11 @@ const App = () => (
         <Route index element={<RequireMenu code="dashboard"><DashboardPage /></RequireMenu>} />
         <Route path="/kullanicilar" element={<RequireMenu code="users"><UsersPage /></RequireMenu>} />
         <Route path="/bayiler" element={<RequireMenu code="dealers"><DealersPage /></RequireMenu>} />
+        <Route path="/musteriler" element={<RequireMenu code="CUSTOMERS"><CustomersPage /></RequireMenu>} />
         <Route path="/uygulamalar" element={<RequireMenu code="apps"><AppsPage /></RequireMenu>} />
         <Route path="/programlar" element={<RequireMenu code="programs"><ProgramsPage /></RequireMenu>} />
         <Route path="/program-surumleri" element={<RequireMenu code="programVersions"><ProgramVersionsPage /></RequireMenu>} />
+        <Route path="/program-yayinlari" element={<RequireMenu code="PROGRAM_EDITIONS"><ProgramEditionsPage /></RequireMenu>} />
         <Route path="/lisanslar" element={<RequireMenu code="licenses"><LicensesPage /></RequireMenu>} />
         <Route path="/yetkilendirmeler" element={<RequireMenu code="authorizations"><AuthorizationsPage /></RequireMenu>} />
         <Route path="/baglantilar" element={<RequireMenu code="connections"><ConnectionsPage /></RequireMenu>} />

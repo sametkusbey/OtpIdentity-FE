@@ -82,7 +82,7 @@ export const LoginPage = () => {
     async (values: FormValues) => {
       try {
         const account = await portalLogin(values.username, values.password);
-        login({ id: (account as any).id, name: account.username, menus: (account as any).menus });
+        login({ id: (account as any).id, name: account.username, menus: (account as any).menus, token: (account as any).token });
         // Remember username if user opted in (do not store password)
         persistRemember(!!values.rememberMe, values.username);
         const redirectPath = (location.state as { from?: Location })?.from?.pathname ?? '/';

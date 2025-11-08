@@ -2,7 +2,7 @@
 import type {
   Result,
   AuthAccountDto,
-  AuthLoginResponseDto,
+  AuthLoginWithTokenResponseDto,
   PortalMenuDto,
 } from '@/types/portal';
 
@@ -28,18 +28,19 @@ export async function portalRegister(
 export async function portalLogin(
   username: string,
   password: string,
-): Promise<AuthLoginResponseDto> {
-  const res = await apiClient.post<Result<AuthLoginResponseDto>>('/auth/login', {
+): Promise<AuthLoginWithTokenResponseDto> {
+  // Prefer JWT login endpoint to obtain token
+  const res = await apiClient.post<Result<AuthLoginWithTokenResponseDto>>('/auth/login/jwt', {
     username,
     password,
   });
-  const payload = res.data as unknown as Result<AuthLoginResponseDto> | AuthLoginResponseDto;
-  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<AuthLoginResponseDto>)) {
-    const result = payload as Result<AuthLoginResponseDto>;
+  const payload = res.data as unknown as Result<AuthLoginWithTokenResponseDto> | AuthLoginWithTokenResponseDto;
+  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<AuthLoginWithTokenResponseDto>)) {
+    const result = payload as Result<AuthLoginWithTokenResponseDto>;
     if (!result.succeeded) throw new Error(result.message ?? 'Giris basarisiz');
-    return result.data as AuthLoginResponseDto;
+    return result.data as AuthLoginWithTokenResponseDto;
   }
-  return payload as AuthLoginResponseDto;
+  return payload as AuthLoginWithTokenResponseDto;
 }
 
 export async function updatePortalAccount(

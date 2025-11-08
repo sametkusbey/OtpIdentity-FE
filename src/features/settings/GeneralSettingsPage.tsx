@@ -98,7 +98,7 @@ export const GeneralSettingsPage = () => {
       if (typeof values.isActive === 'boolean') payload.isActive = values.isActive;
       const fieldTouched = updateForm.isFieldTouched('menuIds');
       const selectedMenus = updateForm.getFieldValue('menuIds') as string[] | undefined;
-      if (fieldTouched) {
+      if (selectedMenus !== undefined) {
         payload.menuIds = selectedMenus ?? [];
       }
       if (!('password' in payload) && !('isActive' in payload) && !('menuIds' in payload)) {

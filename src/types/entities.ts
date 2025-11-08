@@ -47,6 +47,12 @@ export type ProgramVersionDto = BaseEntity & {
   versionName: string;
 };
 
+export type ProgramEditionDto = BaseEntity & {
+  programVersionId: Guid;
+  editionCode: string;
+  editionName: string;
+};
+
 export enum RenewalPeriodType {
   Day = 1,
   Month = 2,

@@ -13,6 +13,8 @@
 } from 'react';
 
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
+import { setAuthToken } from '@/lib/apiClient';
 
 
 
@@ -35,6 +37,7 @@ export type AuthUser = {
   name: string;
   email?: string;
   menus?: import('@/types/portal').PortalMenuDto[];
+  token?: string;
 };
 
 
@@ -45,7 +48,7 @@ type AuthContextValue = {
 
   user?: AuthUser;
 
-  login: (payload?: { id?: string; email?: string; name?: string; menus?: import('@/types/portal').PortalMenuDto[] }) => void;
+  login: (payload?: { id?: string; email?: string; name?: string; menus?: import('@/types/portal').PortalMenuDto[]; token?: string }) => void;
 
   logout: () => void;
 
@@ -125,15 +128,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const [user, setUser] = useState<AuthUser | undefined>(stored?.user);
 
+  // Keep axios Authorization header in sync with current user token
+  useEffect(() => {
+    setAuthToken(user?.token);
+  }, [user?.token]);
 
 
-  const login = useCallback((payload?: { id?: string; email?: string; name?: string; menus?: import('@/types/portal').PortalMenuDto[] }) => {
+
+  const login = useCallback((payload?: { id?: string; email?: string; name?: string; menus?: import('@/types/portal').PortalMenuDto[]; token?: string }) => {
 
     const nextUser: AuthUser = {
       id: payload?.id,
       name: payload?.name || 'OtpIdentity Y��neticisi',
       email: payload?.email,
       menus: payload?.menus,
+      token: payload?.token,
     };
 
     setUser(nextUser);

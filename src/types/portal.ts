@@ -30,3 +30,11 @@ export type AuthLoginResponseDto = {
   isActive: boolean;
   menus: PortalMenuDto[];
 };
+
+export type AuthLoginWithTokenResponseDto = {
+  id: string;
+  username: string;
+  isActive: boolean;
+  menus: PortalMenuDto[];
+  token?: string;
+};

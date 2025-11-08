@@ -16,7 +16,7 @@ export const TableFilterBar = ({ value, onChange, placeholder }: TableFilterBarP
   };
 
   return (
-    <Flex align="center" justify="space-between" wrap gap={12} style={{ marginBottom: 12 }}>
+    <Flex align="center" justify="space-between" wrap="wrap" gap={12} style={{ marginBottom: 12 }}>
       <Input.Search
         allowClear
         value={value}
