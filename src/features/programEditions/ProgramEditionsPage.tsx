@@ -52,10 +52,10 @@ export const ProgramEditionsPage = () => {
   });
 
   const createMutation = useCreateMutation<ProgramEditionFormValues>('programeditions', {
-    successMessage: 'Program surumu olusturuldu.',
+    successMessage: 'Program sürümü oluşturuldu.',
   });
   const updateMutation = useUpdateMutation<ProgramEditionFormValues>('programeditions', {
-    successMessage: 'Program surumu guncellendi.',
+    successMessage: 'Program sürümü güncellendi.',
   });
   const deleteMutation = useDeleteMutation('programeditions', {
     successMessage: 'Kayit silindi.',
@@ -130,7 +130,7 @@ export const ProgramEditionsPage = () => {
 
   const handleDelete = (id: Guid) => {
     modal.confirm({
-      title: 'Kaydi silmek istediginize emin misiniz?',
+      title: 'Kaydı silmek istediğinize emin misiniz?',
       okText: 'Sil',
       okType: 'danger',
       cancelText: 'Vazgec',
@@ -158,15 +158,15 @@ export const ProgramEditionsPage = () => {
       const ver = versionMap.get(v); return ver ? (programNameMap.get(ver.programId) ?? '-') : '-';
     } },
     { title: 'Versiyon', dataIndex: 'programVersionId', render: (v: Guid) => versionMap.get(v)?.versionName ?? '-' },
-    { title: 'Surum Kodu', dataIndex: 'editionCode' },
-    { title: 'Surum Adi', dataIndex: 'editionName' },
+    { title: 'Sürüm Kodu', dataIndex: 'editionCode' },
+    { title: 'Sürüm Adı', dataIndex: 'editionName' },
     {
-      title: 'Islemler',
+      title: 'İşlemler',
       key: 'actions',
       width: 160,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
             <Button icon={<EditOutlined />} onClick={() => void openEdit(record.id)} />
           </Tooltip>
           <Tooltip title="Sil">
@@ -183,7 +183,8 @@ export const ProgramEditionsPage = () => {
   return (
     <>
       <PageHeader
-        title="Program Surumleri"
+        title="Program Sürümleri"
+        description="Program versiyonlarına ait sürüm kayıtlarını yönetin ve yeni sürüm ekleyin."
         actions={
           <Space>
             <Select
@@ -195,7 +196,7 @@ export const ProgramEditionsPage = () => {
               onChange={(v) => { setFilterProgramId(v); setFilterVersionId(undefined); }}
             />
             <Select
-              placeholder="Versiyon filtre"
+              placeholder="Sürüm filtre"
               allowClear
               style={{ minWidth: 200 }}
               options={versionOptionsForFilter.map(({ label, value }) => ({ label, value }))}
@@ -203,7 +204,7 @@ export const ProgramEditionsPage = () => {
               onChange={(v) => { setFilterVersionId(v); }}
             />
             <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-              Yeni Surum
+              Yeni Sürüm
             </Button>
           </Space>
         }
@@ -215,19 +216,19 @@ export const ProgramEditionsPage = () => {
           rowKey="id"
           dataSource={filtered}
           columns={columns}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
       <Modal
-        title={editingId ? 'Surumu Duzenle' : 'Yeni Surum'}
+        title={editingId ? 'Sürümü Düzenle' : 'Yeni Sürüm'}
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
           setEditingId(null);
         }}
         onOk={handleSubmit}
-        okText={editingId ? 'Guncelle' : 'Olustur'}
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
         cancelText="Vazgec"
         width={640}
       >
@@ -237,27 +238,27 @@ export const ProgramEditionsPage = () => {
               <Form.Item
                 label="Program"
                 name="programId"
-                rules={[{ required: true, message: 'Program secimi zorunludur.' }]}
+                rules={[{ required: true, message: 'Program seçimi zorunludur.' }]}
               >
-                <Select placeholder="Program secin" options={programOptions} showSearch optionFilterProp="label" />
+                <Select placeholder="Program seçin" options={programOptions} showSearch optionFilterProp="label" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
                 label="Versiyon"
                 name="programVersionId"
-                rules={[{ required: true, message: 'Versiyon secimi zorunludur.' }]}
+                rules={[{ required: true, message: 'Versiyon seçimi zorunludur.' }]}
               >
-                <Select placeholder="Versiyon secin" options={versionOptionsForForm.map(({ label, value }) => ({ label, value }))} showSearch optionFilterProp="label" />
+                <Select placeholder="Versiyon seçin" options={versionOptionsForForm.map(({ label, value }) => ({ label, value }))} showSearch optionFilterProp="label" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Surum Kodu"
+                label="Sürüm Kodu"
                 name="editionCode"
                 rules={[
-                  { required: true, message: 'Edition kodu zorunludur.' },
-                  { max: 32, message: 'En fazla 32 karakter olmalidir.' },
+                  { required: true, message: 'Sürüm kodu zorunludur.' },
+                  { max: 32, message: 'En fazla 32 karakter olmalıdır.' },
                   () => ({
                     validator: (_, value) => {
                       if (!value) return Promise.resolve();
@@ -266,7 +267,7 @@ export const ProgramEditionsPage = () => {
                       const exists = editions?.some(
                         (e: ProgramEditionDto) => e.programVersionId === vId && e.editionCode.toLowerCase() === String(value).toLowerCase() && e.id !== editingId,
                       );
-                      return exists ? Promise.reject(new Error('Bu program icin edition kodu benzersiz olmalidir.')) : Promise.resolve();
+                      return exists ? Promise.reject(new Error('Bu program için sürüm kodu benzersiz olmalıdır.')) : Promise.resolve();
                     },
                   }),
                 ]}
@@ -276,11 +277,11 @@ export const ProgramEditionsPage = () => {
             </Col>
             <Col xs={24} md={24}>
               <Form.Item
-                label="Surum Adi"
+                label="Sürüm Adı"
                 name="editionName"
                 rules={[
-                  { required: true, message: 'Edition adi zorunludur.' },
-                  { max: 128, message: 'En fazla 128 karakter olmalidir.' },
+                  { required: true, message: 'Sürüm adı zorunludur.' },
+                  { max: 128, message: 'En fazla 128 karakter olmalıdır.' },
                 ]}
               >
                 <Input placeholder="Run" />

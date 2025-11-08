@@ -24,7 +24,7 @@ import { primaryColor, secondaryColor } from '@/config/theme';
 
 import { useAuth } from './AuthContext';
 import { showErrorToast } from '@/lib/toast';
-import { portalLogin } from '@/features/portalAuth/api';
+import { portalLogin, type LoginRequest } from '@/features/portalAuth/api';
 
 
 
@@ -81,8 +81,34 @@ export const LoginPage = () => {
   const handleFinish = useCallback(
     async (values: FormValues) => {
       try {
-        const account = await portalLogin(values.username, values.password);
-        login({ id: (account as any).id, name: account.username, menus: (account as any).menus, token: (account as any).token });
+        // Dokümantasyona göre LoginRequest interface'ini kullan
+        const loginRequest: LoginRequest = {
+          username: values.username,
+          password: values.password,
+        };
+        
+        const account = await portalLogin(loginRequest);
+        
+        console.log('Login başarılı - Account data:', {
+          id: account.id,
+          username: account.username,
+          isAdmin: account.isAdmin,
+          dealerCode: account.dealerCode,
+          hasToken: !!account.token,
+          tokenStart: account.token?.substring(0, 20),
+          menusCount: account.menus?.length ?? 0
+        });
+        
+        // Dokümantasyona göre response'da dealerCode ÖNEMLİ: Frontend'de saklanmalı
+        login({ 
+          id: account.id, 
+          name: account.username, 
+          menus: account.menus, 
+          token: account.token, 
+          isAdmin: account.isAdmin, 
+          dealerCode: account.dealerCode // ÖNEMLİ: Bu saklanmalı
+        });
+        
         // Remember username if user opted in (do not store password)
         persistRemember(!!values.rememberMe, values.username);
         const redirectPath = (location.state as { from?: Location })?.from?.pathname ?? '/';

@@ -28,7 +28,6 @@ import {
 
   Space,
 
-  Switch,
 
   Table,
 
@@ -186,8 +185,6 @@ export const DealersPage = () => {
 
         companyEmailAddress: dealer.companyEmailAddress,
 
-        isCustomer: dealer.isCustomer,
-
         dealerCode: dealer.dealerCode ?? undefined,
 
         userIds: dealer.userIds,
@@ -210,7 +207,7 @@ export const DealersPage = () => {
 
     modal.confirm({
 
-      title: 'Bayiyi silmek istediginize emin misiniz?',
+      title: 'Bayiyi silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -234,31 +231,19 @@ export const DealersPage = () => {
 
       const values = await form.validateFields();
 
-      if (values.isCustomer && !values.dealerCode) {
-
-        form.setFields([
-
-          {
-
-            name: 'dealerCode',
-
-            errors: ['Müşteri olarak işaretlenen bayiler için bayi kodu zorunludur.'],
-
-          },
-
-        ]);
-
-        return;
-
-      }
+      // Bayi oluşturma sayfasında isCustomer her zaman false olarak gönderilir
+      const payload = {
+        ...values,
+        isCustomer: false, // Her zaman false
+      };
 
       if (editingId) {
 
-        await updateMutation.mutateAsync({ id: editingId, payload: values });
+        await updateMutation.mutateAsync({ id: editingId, payload });
 
       } else {
 
-        await createMutation.mutateAsync(values);
+        await createMutation.mutateAsync(payload);
 
       }
 
@@ -375,7 +360,7 @@ export const DealersPage = () => {
 
         <Space>
 
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
 
             <Button icon={<EditOutlined />} onClick={() => void openEditModal(record.id)} />
 
@@ -399,7 +384,7 @@ export const DealersPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Bayiler Yükleniyor..." />;
+    return <LoadingState text="Bayiler yükleniyor..." />;
 
   }
 
@@ -435,7 +420,7 @@ export const DealersPage = () => {
 
         title="Bayi Yönetimi"
 
-        description="Şirket ve bayi kayıtlarını yönetin, müşteri bayileri işaretleyin."
+        description="Bayi kayıtlarını yönetin. Müşteri oluşturmak için Müşteriler sayfasını kullanın."
 
         actions={
 
@@ -457,7 +442,7 @@ export const DealersPage = () => {
           rowKey="id"
           dataSource={filteredDealers}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
@@ -491,8 +476,6 @@ export const DealersPage = () => {
 
             companyType: 1,
 
-            isCustomer: false,
-
             userIds: [],
 
           }}
@@ -513,7 +496,7 @@ export const DealersPage = () => {
 
                   { required: true, message: 'Vergi numarasi zorunludur.' },
 
-                  { max: 32, message: 'En fazla 32 karakter olmalidir.' },
+                  { max: 32, message: 'En fazla 32 karakter olmalıdır.' },
 
                 ]}
 
@@ -537,7 +520,7 @@ export const DealersPage = () => {
 
                   { required: true, message: 'Unvan zorunludur.' },
 
-                  { max: 128, message: 'En fazla 128 karakter olmalidir.' },
+                  { max: 128, message: 'En fazla 128 karakter olmalıdır.' },
 
                 ]}
 
@@ -587,7 +570,7 @@ export const DealersPage = () => {
 
                   { required: true, message: 'Şehir zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -611,7 +594,7 @@ export const DealersPage = () => {
 
                   { required: true, message: 'İlçe zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -635,7 +618,7 @@ export const DealersPage = () => {
 
                   { required: true, message: 'Telefon zorunludur.' },
 
-                  { max: 32, message: 'En fazla 32 karakter olmalidir.' },
+                  { max: 32, message: 'En fazla 32 karakter olmalıdır.' },
 
                 ]}
 
@@ -661,7 +644,7 @@ export const DealersPage = () => {
 
                   { type: 'email', message: 'Geçerli bir e-posta girin.' },
 
-                  { max: 256, message: 'En fazla 256 karakter olmalidir.' },
+                  { max: 256, message: 'En fazla 256 karakter olmalıdır.' },
 
                 ]}
 
@@ -675,77 +658,22 @@ export const DealersPage = () => {
 
             <Col xs={24} md={12}>
 
-              <Row gutter={12}>
+              <Form.Item
 
-                <Col span={12}>
+                label="Bayi Kodu"
 
-                  <Form.Item
+                name="dealerCode"
 
-                    label="Müşteri mi?"
+                rules={[
+                  { required: true, message: 'Bayi kodu zorunludur.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
+                ]}
 
-                    name="isCustomer"
+              >
 
-                    valuePropName="checked"
+                <Input placeholder="Bayi kodu" />
 
-                  >
-
-                    <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
-
-                  </Form.Item>
-
-                </Col>
-
-                <Col span={12}>
-
-                  <Form.Item
-
-                    label="Bayi Kodu"
-
-                    name="dealerCode"
-
-                    rules={[
-
-                      ({ getFieldValue }) => ({
-
-                        validator(_, value) {
-
-                          if (getFieldValue('isCustomer') && !value) {
-
-                            return Promise.reject(
-
-                              new Error('Müşteri bayileri için bayi kodu gereklidir.'),
-
-                            );
-
-                          }
-
-                          if (value && value.length > 64) {
-
-                            return Promise.reject(
-
-                              new Error('En fazla 64 karakter olmalıdır.'),
-
-                            );
-
-                          }
-
-                          return Promise.resolve();
-
-                        },
-
-                      }),
-
-                    ]}
-
-                  >
-
-                    <Input placeholder="Bayi kodu" />
-
-                  </Form.Item>
-
-                </Col>
-
-              </Row>
+              </Form.Item>
 
             </Col>
 

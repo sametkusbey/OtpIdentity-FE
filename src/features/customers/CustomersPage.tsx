@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { App, Button, Col, Form, Input, Modal, Row, Space, Table, Tag, Tooltip } from 'antd';
+import { App, Button, Col, Form, Input, Modal, Row, Space, Table, Tag, Tooltip, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -12,31 +12,50 @@ import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import { apiClient, type ApiError } from '@/lib/apiClient';
 import type { DealerDto, Guid } from '@/types/entities';
+import { CompanyType } from '@/types/entities';
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
+import { useAuth } from '@/features/auth/AuthContext';
+import { listCustomers, createCustomer, updateCustomer, deleteCustomer, type CreateCustomerRequest, type UpdateCustomerRequest } from './api';
 
-type CustomerFormValues = Omit<DealerDto, 'id' | 'isCustomer' | 'dealerCode' | 'userIds'> & {
-  // no dealerCode and no isCustomer toggle in the form
+type CustomerFormValues = Omit<CreateCustomerRequest, 'userIds' | 'isCustomer' | 'dealerCode'> & {
+  // userIds, isCustomer, dealerCode otomatik set edilir
 };
 
 export const CustomersPage = () => {
   const [form] = Form.useForm<CustomerFormValues>();
   const { modal, message } = App.useApp();
+  const { user } = useAuth();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<Guid | null>(null);
-  const mineOnly = true; // always only my customers per PRD
-
   const listQuery = useQuery<DealerDto[], ApiError>({
-    queryKey: ['customers', { mineOnly }],
+    queryKey: ['customers'],
     queryFn: async () => {
-      const url = `/dealers?isCustomer=true${mineOnly ? '&mineOnly=true' : ''}`;
-      const res = await apiClient.get(url);
-      const payload = res.data as unknown;
-      // Result wrapper or array
-      if (Array.isArray(payload)) return payload as DealerDto[];
-      const data = (payload as { data?: unknown })?.data;
-      return (Array.isArray(data) ? (data as DealerDto[]) : []) as DealerDto[];
+      try {
+        console.log('Müşteriler yükleniyor...');
+        console.log('Current auth state:', {
+          isAuthenticated: !!document.querySelector('[data-auth-token]'),
+          hasApiToken: !!(window as any).apiClient?.defaults?.headers?.common?.Authorization
+        });
+        
+        // Dokümantasyona göre customers API'sini kullan
+        // Backend otomatik olarak giriş yapan kullanıcının bayi koduna göre filtreleme yapar
+        // Admin kullanıcılar tüm müşterileri görebilir
+        // Normal kullanıcılar sadece kendi bayi koduna ait müşterileri görür
+        const result = await listCustomers();
+        console.log('Müşteriler yüklendi:', result);
+        return result;
+      } catch (error: any) {
+        console.error('Müşteriler yüklenirken hata:', error);
+        console.error('Error details:', {
+          message: error?.message,
+          status: error?.status,
+          response: error?.response?.data,
+          config: error?.config
+        });
+        throw error;
+      }
     },
   });
 
@@ -44,38 +63,58 @@ export const CustomersPage = () => {
 
   const createMutation = useMutation<DealerDto, ApiError, CustomerFormValues>({
     mutationFn: async (values) => {
-      const payload = { ...values, isCustomer: true } as any;
-      const res = await apiClient.post('/dealers', payload);
-      const data = (res.data as any)?.data ?? res.data;
-      return data as DealerDto;
+      // Bayi kontrolü - admin değilse ve bayi kodu yoksa hata fırlat
+      if (!user?.isAdmin && !user?.dealerCode) {
+        throw new Error('Henüz bayiliğiniz tanımlanmadığı için müşteri oluşturamazsınız.');
+      }
+      
+      // Dokümantasyona göre createCustomer API'sini kullan
+      // Backend otomatik olarak:
+      // - IsCustomer = true set eder
+      // - DealerCode = parent bayinin DealerCode'u atar (user.dealerCode kullanılır)
+      // - ParentDealerId = parent bayinin Id'si atar
+      // - OwnerPortalAccountId = giriş yapan kullanıcının Id'si atar
+      const request: CreateCustomerRequest = {
+        ...values,
+        isCustomer: true, // Her zaman true
+        dealerCode: null, // Backend otomatik atar (user.dealerCode kullanılır)
+        userIds: [], // Boş array gönder
+      };
+      return await createCustomer(request);
     },
     onSuccess: async () => {
       await refetch();
-      message.success('Musteri olusturuldu.');
+      message.success('Müşteri oluşturuldu.');
     },
   });
 
   const updateMutation = useMutation<DealerDto, ApiError, { id: Guid; payload: CustomerFormValues }>({
     mutationFn: async ({ id, payload }) => {
-      const body = { ...payload, isCustomer: true } as any;
-      const res = await apiClient.put(`/dealers/${id}`, body);
-      const data = (res.data as any)?.data ?? res.data;
-      return data as DealerDto;
+      // Dokümantasyona göre updateCustomer API'sini kullan
+      // İş Mantığı:
+      // 1. Müşteri bulma ve yetki kontrolü
+      // 2. Bilgileri güncelleme
+      // 3. DealerCode korunur (değiştirilmez)
+      const request: UpdateCustomerRequest = {
+        ...payload,
+        userIds: [],
+      };
+      return await updateCustomer(id, request);
     },
     onSuccess: async () => {
       await refetch();
-      message.success('Musteri guncellendi.');
+      message.success('Müşteri güncellendi.');
     },
   });
 
   const deleteMutation = useMutation<unknown, ApiError, Guid>({
     mutationFn: async (id) => {
-      const res = await apiClient.delete(`/dealers/${id}`);
-      return res.data;
+      // Dokümantasyona göre deleteCustomer API'sini kullan
+      return await deleteCustomer(id);
     },
     onSuccess: async () => {
       await refetch();
-      message.success('Musteri silindi.');
+      message.success('Müşteri silindi.');
     },
   });
 
@@ -84,18 +123,41 @@ export const CustomersPage = () => {
   const filtered = useMemo(() => filterByQuery(data, search), [data, search]);
 
   useEffect(() => {
-    if (!isModalOpen) form.resetFields();
+    if (!isModalOpen) {
+      form.resetFields();
+      setEditingId(null);
+    }
   }, [isModalOpen, form]);
 
   const openCreate = () => {
+    // Bayi kontrolü - admin değilse ve bayi kodu yoksa uyarı göster
+    if (!user?.isAdmin && !user?.dealerCode) {
+      message.error('Henüz bayiliğiniz tanımlanmadığı için müşteri oluşturamazsınız.');
+      return;
+    }
+    
     setEditingId(null);
     setIsModalOpen(true);
   };
 
   const openEdit = useCallback(async (id: Guid) => {
     try {
-      const res = await apiClient.get(`/dealers/${id}`);
-      const entity = ((res.data as any)?.data ?? res.data) as DealerDto;
+      const res = await apiClient.get(`/customers/${id}`);
+      const responseData = res.data as unknown;
+      
+      let entity: DealerDto;
+      // API response format kontrolü - backend dokümantasyonuna göre isSuccess kullanılıyor
+      if (responseData && typeof responseData === 'object' && 'isSuccess' in responseData) {
+        const result = responseData as { isSuccess: boolean; data?: unknown; message?: string };
+        if (result.isSuccess) {
+          entity = result.data as DealerDto;
+        } else {
+          throw new Error(result.message ?? 'Müşteri detayı alınamadı');
+        }
+      } else {
+        entity = ((responseData as any)?.data ?? responseData) as DealerDto;
+      }
+      
       setEditingId(id);
       setIsModalOpen(true);
       form.setFieldsValue({
@@ -107,8 +169,8 @@ export const CustomersPage = () => {
         companyPhoneNumber: entity.companyPhoneNumber,
         companyEmailAddress: entity.companyEmailAddress,
       } as CustomerFormValues);
-    } catch (e) {
-      // ignore, error UI handles below
+    } catch {
+      // ignore
     }
   }, [form]);
 
@@ -118,7 +180,7 @@ export const CustomersPage = () => {
       const payload: CustomerFormValues = {
         taxIdentifierNumber: String(values.taxIdentifierNumber || '').trim(),
         title: String(values.title || '').trim(),
-        companyType: values.companyType,
+        companyType: Number(values.companyType),
         city: String(values.city || '').trim(),
         district: String(values.district || '').trim(),
         companyPhoneNumber: String(values.companyPhoneNumber || '').trim(),
@@ -139,10 +201,10 @@ export const CustomersPage = () => {
 
   const handleDelete = (id: Guid) => {
     modal.confirm({
-      title: 'Kaydi silmek istediginize emin misiniz?',
+      title: 'Kaydı silmek istediğinize emin misiniz?',
       okText: 'Sil',
       okType: 'danger',
-      cancelText: 'Vazgec',
+      cancelText: 'Vazgeç',
       centered: true,
       onOk: async () => {
         await deleteMutation.mutateAsync(id);
@@ -153,19 +215,18 @@ export const CustomersPage = () => {
   const columns: ColumnsType<DealerDto> = [
     { title: 'Unvan', dataIndex: 'title' },
     { title: 'Vergi No', dataIndex: 'taxIdentifierNumber' },
-    { title: 'Sehir', dataIndex: 'city' },
-    { title: 'Ilce', dataIndex: 'district' },
+    { title: 'Şehir', dataIndex: 'city' },
+    { title: 'İlçe', dataIndex: 'district' },
     { title: 'Telefon', dataIndex: 'companyPhoneNumber' },
     { title: 'E-posta', dataIndex: 'companyEmailAddress' },
-    { title: 'Musteri mi?', dataIndex: 'isCustomer', render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? 'Evet' : 'Hayir'}</Tag> },
-    { title: 'Kod', dataIndex: 'dealerCode', render: (v?: string | null) => v ?? '-' },
+    { title: 'Müşteri mi?', dataIndex: 'isCustomer', render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? 'Evet' : 'Hayır'}</Tag> },
     {
-      title: 'Islemler',
+      title: 'İşlemler',
       key: 'actions',
       width: 160,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Duzenle">
+          <Tooltip title="Düzenle">
             <Button icon={<EditOutlined />} onClick={() => void openEdit(record.id)} />
           </Tooltip>
           <Tooltip title="Sil">
@@ -176,17 +237,34 @@ export const CustomersPage = () => {
     },
   ];
 
-  if (listQuery.isLoading) return <LoadingState text="Musteriler yukleniyor..." />;
-  if (listQuery.isError || !data) return <ErrorState onRetry={() => void refetch()} subtitle="Musteriler alinirken bir hata olustu." />;
+  if (listQuery.isLoading) return <LoadingState text="Müşteriler yükleniyor..." />;
+  if (listQuery.isError || !data) return <ErrorState onRetry={() => void refetch()} subtitle="Müşteriler alınırken bir hata oluştu." />;
 
   return (
     <>
       <PageHeader
-        title="Musteriler"
+        title="Müşteri Yönetimi"
+        description="Müşteri kayıtlarını yönetin ve düzenleyin."
         actions={
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            Yeni Musteri
-          </Button>
+          // Sadece admin veya bayi kodu olan kullanıcılar müşteri oluşturabilir
+          (user?.isAdmin || user?.dealerCode) ? (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={openCreate}
+            >
+              Yeni Müşteri
+            </Button>
+          ) : (
+            <Button
+              type="default"
+              disabled
+              icon={<PlusOutlined />}
+              title="Henüz bayiliğiniz tanımlanmadığı için müşteri oluşturamazsınız."
+            >
+              Yeni Müşteri
+            </Button>
+          )
         }
       />
 
@@ -196,23 +274,23 @@ export const CustomersPage = () => {
           rowKey="id"
           dataSource={filtered}
           columns={columns}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
       <Modal
-        title={editingId ? 'Musteriyi Duzenle' : 'Yeni Musteri'}
+        title={editingId ? 'Müşteriyi Düzenle' : 'Yeni Müşteri'}
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
           setEditingId(null);
         }}
         onOk={handleSubmit}
-        okText={editingId ? 'Guncelle' : 'Olustur'}
-        cancelText="Vazgec"
+        okText={editingId ? 'Güncelle' : 'Oluştur'}
+        cancelText="Vazgeç"
         width={640}
       >
-        <Form<CustomerFormValues> form={form} layout="vertical">
+        <Form<CustomerFormValues> form={form} layout="vertical" initialValues={{ companyType: CompanyType.Limited }}>
           <Row gutter={[18, 18]}>
             <Col xs={24} md={12}>
               <Form.Item label="Vergi No" name="taxIdentifierNumber" rules={[{ required: true, message: 'Vergi no zorunludur.' }, { max: 32 }]}>
@@ -225,13 +303,18 @@ export const CustomersPage = () => {
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Sehir" name="city" rules={[{ required: true }, { max: 64 }]}>
-                <Input placeholder="Sehir" />
+              <Form.Item label="Şirket Türü" name="companyType" rules={[{ required: true, message: 'Şirket türü zorunludur.' }]}>
+                <Select options={[{ value: CompanyType.Limited, label: 'Limited' }]} placeholder="Şirket türü" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Ilce" name="district" rules={[{ required: true }, { max: 64 }]}>
-                <Input placeholder="Ilce" />
+              <Form.Item label="Şehir" name="city" rules={[{ required: true }, { max: 64 }]}>
+                <Input placeholder="Şehir" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="İlçe" name="district" rules={[{ required: true }, { max: 64 }]}>
+                <Input placeholder="İlçe" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -240,8 +323,8 @@ export const CustomersPage = () => {
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="E-posta" name="companyEmailAddress" rules={[{ required: true }, { type: 'email', message: 'Gecerli bir e-posta girin.' }, { max: 256 }]}>
-                <Input placeholder="ornek@firma.com" />
+              <Form.Item label="E-posta" name="companyEmailAddress" rules={[{ required: true }, { type: 'email', message: 'Geçerli bir e-posta girin.' }, { max: 256 }]}>
+                <Input placeholder="örnek@firma.com" />
               </Form.Item>
             </Col>
           </Row>

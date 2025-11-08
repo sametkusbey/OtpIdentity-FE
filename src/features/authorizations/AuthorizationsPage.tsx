@@ -296,7 +296,7 @@ export const AuthorizationsPage = () => {
 
     modal.confirm({
 
-      title: 'Yetki Kaydını silmek istediginize emin misiniz?',
+      title: 'Yetki Kaydını silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -513,7 +513,7 @@ export const AuthorizationsPage = () => {
           rowKey="id"
           dataSource={filteredAuthorizations}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 

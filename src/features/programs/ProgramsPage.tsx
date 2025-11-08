@@ -269,7 +269,7 @@ export const ProgramsPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Programlar Yükleniyor..." />;
+    return <LoadingState text="Programlar yükleniyor..." />;
 
   }
 
@@ -319,7 +319,7 @@ export const ProgramsPage = () => {
           rowKey="id"
           dataSource={filteredPrograms}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 

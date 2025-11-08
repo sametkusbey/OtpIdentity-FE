@@ -294,7 +294,7 @@ export const CompanyAddressesPage = () => {
 
     modal.confirm({
 
-      title: 'Adres Kaydını silmek istediginize emin misiniz?',
+      title: 'Adres Kaydını silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -548,7 +548,7 @@ export const CompanyAddressesPage = () => {
           rowKey="id"
           dataSource={filteredAddresses}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
@@ -630,7 +630,7 @@ export const CompanyAddressesPage = () => {
 
                   { required: true, message: 'Adres adı zorunludur.' },
 
-                  { max: 128, message: 'En fazla 128 karakter olmalidir.' },
+                  { max: 128, message: 'En fazla 128 karakter olmalıdır.' },
 
                 ]}
 
@@ -654,7 +654,7 @@ export const CompanyAddressesPage = () => {
 
                   { required: true, message: 'Ülke zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -678,7 +678,7 @@ export const CompanyAddressesPage = () => {
 
                   { required: true, message: 'Şehir zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -702,7 +702,7 @@ export const CompanyAddressesPage = () => {
 
                   { required: true, message: 'İlçe zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -722,7 +722,7 @@ export const CompanyAddressesPage = () => {
 
                 name="town"
 
-                rules={[{ max: 64, message: 'En fazla 64 karakter olmalidir.' }]}
+                rules={[{ max: 64, message: 'En fazla 64 karakter olmalıdır.' }]}
 
               >
 
@@ -744,7 +744,7 @@ export const CompanyAddressesPage = () => {
 
                   { required: true, message: 'Cadde veya sokak zorunludur.' },
 
-                  { max: 128, message: 'En fazla 128 karakter olmalidir.' },
+                  { max: 128, message: 'En fazla 128 karakter olmalıdır.' },
 
                 ]}
 
@@ -768,7 +768,7 @@ export const CompanyAddressesPage = () => {
 
                   { required: true, message: 'Posta kodu zorunludur.' },
 
-                  { max: 16, message: 'En fazla 16 karakter olmalidir.' },
+                  { max: 16, message: 'En fazla 16 karakter olmalıdır.' },
 
                 ]}
 
@@ -788,7 +788,7 @@ export const CompanyAddressesPage = () => {
 
                 name="apartmentName"
 
-                rules={[{ max: 128, message: 'En fazla 128 karakter olmalidir.' }]}
+                rules={[{ max: 128, message: 'En fazla 128 karakter olmalıdır.' }]}
 
               >
 
@@ -806,7 +806,7 @@ export const CompanyAddressesPage = () => {
 
                 name="apartmentNumber"
 
-                rules={[{ max: 16, message: 'En fazla 16 karakter olmalidir.' }]}
+                rules={[{ max: 16, message: 'En fazla 16 karakter olmalıdır.' }]}
 
               >
 
@@ -824,7 +824,7 @@ export const CompanyAddressesPage = () => {
 
                 name="doorNumber"
 
-                rules={[{ max: 16, message: 'En fazla 16 karakter olmalidir.' }]}
+                rules={[{ max: 16, message: 'En fazla 16 karakter olmalıdır.' }]}
 
               >
 
@@ -846,7 +846,7 @@ export const CompanyAddressesPage = () => {
 
                   { type: 'email', message: 'Geçerli bir e-posta adresi girin.' },
 
-                  { max: 256, message: 'En fazla 256 karakter olmalidir.' },
+                  { max: 256, message: 'En fazla 256 karakter olmalıdır.' },
 
                 ]}
 
@@ -870,7 +870,7 @@ export const CompanyAddressesPage = () => {
 
                   { type: 'url', message: 'Geçerli bir URL girin.' },
 
-                  { max: 256, message: 'En fazla 256 karakter olmalidir.' },
+                  { max: 256, message: 'En fazla 256 karakter olmalıdır.' },
 
                 ]}
 
@@ -918,7 +918,7 @@ export const CompanyAddressesPage = () => {
 
                 name="eInvoiceAlias"
 
-                rules={[{ max: 128, message: 'En fazla 128 karakter olmalidir.' }]}
+                rules={[{ max: 128, message: 'En fazla 128 karakter olmalıdır.' }]}
 
               >
 
@@ -964,7 +964,7 @@ export const CompanyAddressesPage = () => {
 
                 name="eWaybillAlias"
 
-                rules={[{ max: 128, message: 'En fazla 128 karakter olmalidir.' }]}
+                rules={[{ max: 128, message: 'En fazla 128 karakter olmalıdır.' }]}
 
               >
 

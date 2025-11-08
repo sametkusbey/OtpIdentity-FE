@@ -4,54 +4,76 @@ import type {
   AuthAccountDto,
   AuthLoginWithTokenResponseDto,
   PortalMenuDto,
+  PortalAccountListItemDto,
 } from '@/types/portal';
 
-export async function portalRegister(
-  username: string,
-  password: string,
-  menuIds?: string[],
-): Promise<AuthAccountDto> {
-  const res = await apiClient.post<Result<AuthAccountDto>>('/auth/register', {
-    username,
-    password,
-    menuIds,
-  });
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  menuIds?: string[];
+  dealerId?: string; // Bayi seçimi için ÖNEMLİ
+}
+
+export async function portalRegister(request: RegisterRequest): Promise<AuthAccountDto> {
+  // Backend dokümantasyonuna göre:
+  // - Username benzersizlik kontrolü
+  // - Password hash'leme
+  // - Portal hesap oluşturma
+  // - Menü ilişkilendirme (varsa)
+  // - Bayi ilişkilendirme (varsa):
+  //   - Dealer.OwnerPortalAccountId = PortalAccount.Id
+  //   - PortalAccount.DealerCode = Dealer.DealerCode
+
+  const res = await apiClient.post<Result<AuthAccountDto>>('/auth/register', request);
   const payload = res.data as unknown as Result<AuthAccountDto> | AuthAccountDto;
-  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<AuthAccountDto>)) {
-    const result = payload as Result<AuthAccountDto>;
-    if (!result.succeeded) throw new Error(result.message ?? 'Kayit basarisiz');
+  
+  if (payload && typeof payload === 'object' && ('succeeded' in payload || 'isSuccess' in payload)) {
+    const result = payload as any;
+    const succeeded = result.succeeded ?? result.isSuccess;
+    if (!succeeded) throw new Error(result.message ?? 'Kayıt başarısız');
     return result.data as AuthAccountDto;
   }
+  
   return payload as AuthAccountDto;
 }
 
-export async function portalLogin(
-  username: string,
-  password: string,
-): Promise<AuthLoginWithTokenResponseDto> {
-  // Prefer JWT login endpoint to obtain token
-  const res = await apiClient.post<Result<AuthLoginWithTokenResponseDto>>('/auth/login/jwt', {
-    username,
-    password,
-  });
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export async function portalLogin(request: LoginRequest): Promise<AuthLoginWithTokenResponseDto> {
+  // Backend dokümantasyonuna göre JWT login endpoint'i kullanılır
+  // İş Mantığı:
+  // 1. Username ile hesap bulma
+  // 2. Hesap aktiflik kontrolü
+  // 3. Password doğrulama
+  // 4. Aktif menüleri getirme
+  // 5. DealerCode'u response'a dahil etme (ÖNEMLİ: Frontend'de saklanmalı)
+  
+  const res = await apiClient.post<Result<AuthLoginWithTokenResponseDto>>('/auth/login/jwt', request);
   const payload = res.data as unknown as Result<AuthLoginWithTokenResponseDto> | AuthLoginWithTokenResponseDto;
-  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<AuthLoginWithTokenResponseDto>)) {
-    const result = payload as Result<AuthLoginWithTokenResponseDto>;
-    if (!result.succeeded) throw new Error(result.message ?? 'Giris basarisiz');
+  
+  if (payload && typeof payload === 'object' && ('succeeded' in payload || 'isSuccess' in payload)) {
+    const result = payload as any;
+    const succeeded = result.succeeded ?? result.isSuccess;
+    if (!succeeded) throw new Error(result.message ?? 'Giriş başarısız');
     return result.data as AuthLoginWithTokenResponseDto;
   }
+  
   return payload as AuthLoginWithTokenResponseDto;
 }
 
 export async function updatePortalAccount(
   id: string,
-  payload: { password?: string; isActive?: boolean; menuIds?: string[] },
+  payload: { password?: string; isActive?: boolean; menuIds?: string[]; ownedDealerId?: string | null; dealerCode?: string | null },
 ): Promise<AuthAccountDto> {
   const res = await apiClient.put<Result<AuthAccountDto>>(`/portalaccounts/${id}`, payload);
   const data = res.data as unknown as Result<AuthAccountDto> | AuthAccountDto;
-  if (data && typeof data === 'object' && 'succeeded' in (data as Result<AuthAccountDto>)) {
-    const result = data as Result<AuthAccountDto>;
-    if (!result.succeeded) throw new Error(result.message ?? 'Guncelleme basarisiz');
+  if (data && typeof data === 'object' && ('succeeded' in data || 'isSuccess' in data)) {
+    const result = data as any;
+    const succeeded = result.succeeded ?? result.isSuccess;
+    if (!succeeded) throw new Error(result.message ?? 'Güncelleme başarısız');
     return result.data as AuthAccountDto;
   }
   return data as AuthAccountDto;
@@ -60,9 +82,10 @@ export async function updatePortalAccount(
 export async function deactivatePortalAccount(id: string): Promise<void> {
   const res = await apiClient.delete<Result<unknown>>(`/portalaccounts/${id}`);
   const data = res.data as unknown as Result<unknown> | unknown;
-  if (data && typeof data === 'object' && 'succeeded' in (data as Result<unknown>)) {
-    const result = data as Result<unknown>;
-    if (!result.succeeded) throw new Error(result.message ?? 'Pasife alma basarisiz');
+  if (data && typeof data === 'object' && ('succeeded' in data || 'isSuccess' in data)) {
+    const result = data as any;
+    const succeeded = result.succeeded ?? result.isSuccess;
+    if (!succeeded) throw new Error(result.message ?? 'Pasife alma başarısız');
   }
 }
 
@@ -71,25 +94,15 @@ export async function getPortalAccount(id: string): Promise<AuthAccountDto> {
     `/portalaccounts/${encodeURIComponent(id)}`,
   );
   const payload = res.data as unknown;
-  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<AuthAccountDto>)) {
-    const r = payload as Result<AuthAccountDto>;
-    if (!r.succeeded) throw new Error(r.message ?? 'Kayit alinamadi');
+  if (payload && typeof payload === 'object' && ('succeeded' in payload || 'isSuccess' in payload)) {
+    const r = payload as any;
+    const succeeded = r.succeeded ?? r.isSuccess;
+    if (!succeeded) throw new Error(r.message ?? 'Kayıt alınamadı');
     return r.data as AuthAccountDto;
   }
   return payload as AuthAccountDto;
 }
 
-export async function listPortalMenus(): Promise<PortalMenuDto[]> {
-  const res = await apiClient.get<Result<PortalMenuDto[]> | PortalMenuDto[]>('/portalmenus');
-  const payload = res.data as unknown;
-  if (Array.isArray(payload)) return payload as PortalMenuDto[];
-  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<PortalMenuDto[]>)) {
-    const r = payload as Result<PortalMenuDto[]>;
-    if (!r.succeeded) throw new Error(r.message ?? 'Menuler alinamadi');
-    return (r.data ?? []) as PortalMenuDto[];
-  }
-  return [];
-}
 
 
 export async function getPortalAccountMenus(id: string): Promise<PortalMenuDto[]> {
@@ -98,10 +111,35 @@ export async function getPortalAccountMenus(id: string): Promise<PortalMenuDto[]
   );
   const payload = res.data as unknown;
   if (Array.isArray(payload)) return payload as PortalMenuDto[];
-  if (payload && typeof payload === 'object' && 'succeeded' in (payload as Result<PortalMenuDto[]>)) {
-    const r = payload as Result<PortalMenuDto[]>;
-    if (!r.succeeded) throw new Error(r.message ?? 'Kullanici menuleri alinamadi');
+  if (payload && typeof payload === 'object' && ('succeeded' in payload || 'isSuccess' in payload)) {
+    const r = payload as any;
+    const succeeded = r.succeeded ?? r.isSuccess;
+    if (!succeeded) throw new Error(r.message ?? 'Kullanıcı menüleri alınamadı');
     return (r.data ?? []) as PortalMenuDto[];
   }
   return [];
 }
+
+export async function listPortalAccounts(): Promise<PortalAccountListItemDto[]> {
+  const res = await apiClient.get<Result<PortalAccountListItemDto[]> | PortalAccountListItemDto[]>('/portalaccounts');
+  const payload = res.data as unknown;
+  if (Array.isArray(payload)) return payload as PortalAccountListItemDto[];
+  if (payload && typeof payload === 'object' && ('succeeded' in payload || 'isSuccess' in payload)) {
+    const r = payload as any;
+    const succeeded = r.succeeded ?? r.isSuccess;
+    if (!succeeded) throw new Error(r.message ?? 'Portal hesapları alınamadı');
+    return (r.data ?? []) as PortalAccountListItemDto[];
+  }
+  return [];
+}
+
+export async function deletePortalAccount(id: string): Promise<void> {
+  const res = await apiClient.delete<Result<unknown>>(`/portalaccounts/${id}`);
+  const data = res.data as unknown as Result<unknown> | unknown;
+  if (data && typeof data === 'object' && ('succeeded' in data || 'isSuccess' in data)) {
+    const result = data as any;
+    const succeeded = result.succeeded ?? result.isSuccess;
+    if (!succeeded) throw new Error(result.message ?? 'Silme başarısız');
+  }
+}
+

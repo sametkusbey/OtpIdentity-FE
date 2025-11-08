@@ -223,7 +223,7 @@ export const UsersPage = () => {
   ];
 
   if (isLoading) {
-    return <LoadingState text="Kullanıcılar Yükleniyor..." />;
+    return <LoadingState text="Kullanıcılar yükleniyor..." />;
   }
 
   if (isError || !users) {
@@ -254,7 +254,7 @@ export const UsersPage = () => {
           rowKey="id"
           dataSource={filteredUsers}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
       <Modal

@@ -290,7 +290,7 @@ export const LicensesPage = () => {
 
     modal.confirm({
 
-      title: 'Lisans silmek istediginize emin misiniz?',
+      title: 'Lisans silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -531,7 +531,7 @@ export const LicensesPage = () => {
           rowKey="id"
           dataSource={filteredLicenses}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 

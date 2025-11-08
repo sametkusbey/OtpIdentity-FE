@@ -112,19 +112,19 @@ export const ProgramVersionsPage = () => {
 
   const createMutation = useCreateMutation<ProgramVersionFormValues>('versions', {
 
-    successMessage: 'Program surumu Oluşturuldu.',
+    successMessage: 'Program versiyonu oluşturuldu.',
 
   });
 
   const updateMutation = useUpdateMutation<ProgramVersionFormValues>('versions', {
 
-    successMessage: 'Program surumu Güncellendi.',
+    successMessage: 'Program versiyonu güncellendi.',
 
   });
 
   const deleteMutation = useDeleteMutation('versions', {
 
-    successMessage: 'Surum silindi.',
+    successMessage: 'Versiyon silindi.',
 
   });
 
@@ -212,7 +212,7 @@ export const ProgramVersionsPage = () => {
 
     modal.confirm({
 
-      title: 'Surumu silmek istediginize emin misiniz?',
+      title: 'Versiyonu silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -280,7 +280,7 @@ export const ProgramVersionsPage = () => {
 
     {
 
-      title: 'Surum Kodu',
+      title: 'Versiyon Kodu',
 
       dataIndex: 'versionCode',
 
@@ -288,7 +288,7 @@ export const ProgramVersionsPage = () => {
 
     {
 
-      title: 'Surum Adi',
+      title: 'Versiyon Adı',
 
       dataIndex: 'versionName',
 
@@ -330,7 +330,7 @@ export const ProgramVersionsPage = () => {
 
   if (isLoading) {
 
-    return <LoadingState text="Program surumleri Yükleniyor..." />;
+    return <LoadingState text="Program versiyonleri yükleniyor..." />;
 
   }
 
@@ -342,7 +342,7 @@ export const ProgramVersionsPage = () => {
 
       <ErrorState
 
-        subtitle="Program surumleri alinirken bir hata olustu."
+        subtitle="Program versiyonları alınırken bir hata oluştu."
 
         onRetry={() => {
 
@@ -364,15 +364,15 @@ export const ProgramVersionsPage = () => {
 
       <PageHeader
 
-        title="Program Sürümü Yönetimi"
+        title="Program Versiyon Yönetimi"
 
-        description="Her program için benzersiz sürüm kodları tanımlayın."
+        description="Her program için benzersiz versiyon kodları tanımlayın."
 
         actions={
 
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
 
-            Yeni Sürüm
+            Yeni Versiyon
 
           </Button>
 
@@ -388,7 +388,7 @@ export const ProgramVersionsPage = () => {
           rowKey="id"
           dataSource={filteredProgramVersions}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
@@ -396,7 +396,7 @@ export const ProgramVersionsPage = () => {
 
       <Modal
 
-        title={editingId ? 'Sürümü Düzenle' : 'Yeni Program Sürümü'}
+        title={editingId ? 'Versiyon Düzenle' : 'Yeni Program Versiyon'}
 
         open={isModalOpen}
 
@@ -460,13 +460,13 @@ export const ProgramVersionsPage = () => {
 
               <Form.Item
 
-                label="Sürüm Kodu"
+                label="Versiyon Kodu"
 
                 name="versionCode"
 
                 rules={[
 
-                  { required: true, message: 'Sürüm kodu zorunludur.' },
+                  { required: true, message: 'Versiyon kodu zorunludur.' },
 
                   { max: 32, message: 'En fazla 32 karakter olmalıdır.' },
 
@@ -496,7 +496,7 @@ export const ProgramVersionsPage = () => {
 
                         return Promise.reject(
 
-                          new Error('Seçilen program için bu sürüm kodu zaten kayıtlı.'),
+                          new Error('Seçilen program için bu versiyon kodu zaten kayıtlı.'),
 
                         );
 
@@ -522,13 +522,13 @@ export const ProgramVersionsPage = () => {
 
               <Form.Item
 
-                label="Sürüm Adı"
+                label="Versiyon Adı"
 
                 name="versionName"
 
                 rules={[
 
-                  { required: true, message: 'Sürüm adı zorunludur.' },
+                  { required: true, message: 'Versiyon adı zorunludur.' },
 
                   { max: 128, message: 'En fazla 128 karakter olmalıdır.' },
 
@@ -536,7 +536,7 @@ export const ProgramVersionsPage = () => {
 
               >
 
-                <Input placeholder="Sürüm adı" />
+                <Input placeholder="Versiyon adı" />
 
               </Form.Item>
 

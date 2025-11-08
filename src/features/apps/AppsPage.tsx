@@ -164,7 +164,7 @@ export const AppsPage = () => {
 
     modal.confirm({
 
-      title: 'Bu uygulamayi silmek istediginize emin misiniz?',
+      title: 'Bu uygulamayı silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -328,7 +328,7 @@ export const AppsPage = () => {
           rowKey="id"
           dataSource={filteredApps}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 

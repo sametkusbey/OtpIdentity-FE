@@ -430,7 +430,7 @@ export const CompanyRepresentativesPage = () => {
           rowKey="id"
           dataSource={filteredRepresentatives}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
@@ -498,7 +498,7 @@ export const CompanyRepresentativesPage = () => {
 
                   { required: true, message: 'Ad zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -522,7 +522,7 @@ export const CompanyRepresentativesPage = () => {
 
                   { required: true, message: 'Soyad zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -542,7 +542,7 @@ export const CompanyRepresentativesPage = () => {
 
                 name="phoneNumber"
 
-                rules={[{ max: 32, message: 'En fazla 32 karakter olmalidir.' }]}
+                rules={[{ max: 32, message: 'En fazla 32 karakter olmalıdır.' }]}
 
               >
 
@@ -564,7 +564,7 @@ export const CompanyRepresentativesPage = () => {
 
                   { type: 'email', message: 'Geçerli bir e-posta girin.' },
 
-                  { max: 256, message: 'En fazla 256 karakter olmalidir.' },
+                  { max: 256, message: 'En fazla 256 karakter olmalıdır.' },
 
                 ]}
 

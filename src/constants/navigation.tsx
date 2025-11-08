@@ -11,6 +11,7 @@ import {
   TeamOutlined,
   UserOutlined,
   SettingOutlined,
+  BugOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 
@@ -30,12 +31,13 @@ export const navigationItems: NavigationItem[] = [
   { key: 'apps', label: 'Uygulamalar', path: '/uygulamalar', icon: <AppstoreOutlined />, code: 'apps' },
   { key: 'programs', label: 'Programlar', path: '/programlar', icon: <BranchesOutlined />, code: 'programs' },
   { key: 'programVersions', label: 'Program Versiyonlari', path: '/program-surumleri', icon: <BarsOutlined />, code: 'programVersions' },
-  { key: 'customers', label: 'Musteriler', path: '/musteriler', icon: <TeamOutlined />, code: 'CUSTOMERS' },
-  { key: 'programEditions', label: 'Program Surumleri', path: '/program-yayinlari', icon: <BarsOutlined />, code: 'PROGRAM_EDITIONS' },
+  { key: 'customers', label: 'Musteriler', path: '/musteriler', icon: <TeamOutlined />, code: 'customers' },
+  { key: 'programEditions', label: 'Program Sürümleri', path: '/program-yayinlari', icon: <BarsOutlined />, code: 'programEditions' },
   { key: 'licenses', label: 'Lisanslar', path: '/lisanslar', icon: <IdcardOutlined />, code: 'licenses' },
   { key: 'authorizations', label: 'Yetkilendirmeler', path: '/yetkilendirmeler', icon: <CrownOutlined />, code: 'authorizations' },
   { key: 'connections', label: 'Baglantilar', path: '/baglantilar', icon: <LinkOutlined />, code: 'connections' },
   { key: 'companyAddresses', label: 'Sirket Adresleri', path: '/sirket-adresleri', icon: <BankOutlined />, code: 'companyAddresses' },
   { key: 'companyRepresentatives', label: 'Sirket Temsilcileri', path: '/sirket-temsilcileri', icon: <ApartmentOutlined />, code: 'companyRepresentatives' },
   { key: 'generalSettings', label: 'Genel Ayarlar', path: '/genel-ayarlar', icon: <SettingOutlined />, code: 'generalSettings' },
+  { key: 'debug', label: 'Debug', path: '/debug', icon: <BugOutlined />, code: 'debug' },
 ];

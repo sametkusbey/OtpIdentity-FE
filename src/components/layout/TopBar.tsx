@@ -25,7 +25,6 @@ type TopBarProps = {
 
 
 export const TopBar = ({ collapsed, onToggle }: TopBarProps) => {
-
   const { user, logout } = useAuth();
 
 
@@ -94,29 +93,17 @@ export const TopBar = ({ collapsed, onToggle }: TopBarProps) => {
       <Space size={16}>
 
         <Flex align="center" gap={12}>
-
           <Avatar style={{ backgroundColor: '#06923e' }}>
-
             {user?.name?.[0] ?? 'O'}
-
           </Avatar>
-
           <Space direction="vertical" size={0}>
-
             <Typography.Text strong>
-
               {user?.name ?? 'OtpIdentity Yöneticisi'}
-
             </Typography.Text>
-
             {user?.email && (
-
               <Typography.Text type="secondary">{user.email}</Typography.Text>
-
             )}
-
           </Space>
-
         </Flex>
 
         <Button

@@ -21,13 +21,15 @@ export type UserDto = BaseEntity & {
 export type DealerDto = BaseEntity & {
   taxIdentifierNumber: string;
   title: string;
-  companyType: number;
+  companyType: CompanyType;
   city: string;
   district: string;
   companyPhoneNumber: string;
   companyEmailAddress: string;
   isCustomer: boolean;
   dealerCode?: string | null;
+  ownerPortalAccountId?: Guid | null;
+  parentDealerId?: Guid | null;
   userIds: Guid[];
 };
 
@@ -53,10 +55,14 @@ export type ProgramEditionDto = BaseEntity & {
   editionName: string;
 };
 
+export enum CompanyType {
+  Limited = 1  // Şu anda sadece Limited şirket türü mevcut
+}
+
 export enum RenewalPeriodType {
-  Day = 1,
-  Month = 2,
-  Year = 3,
+  Day = 1,    // Günlük
+  Month = 2,  // Aylık
+  Year = 3    // Yıllık
 }
 
 export type LicenseDto = BaseEntity & {

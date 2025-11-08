@@ -1,4 +1,5 @@
 import { Flex, Input } from 'antd';
+import type { ReactNode } from 'react';
 
 import type { ChangeEvent } from 'react';
 
@@ -7,10 +8,11 @@ type TableFilterBarProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  extra?: ReactNode;
 };
 
 
-export const TableFilterBar = ({ value, onChange, placeholder }: TableFilterBarProps) => {
+export const TableFilterBar = ({ value, onChange, placeholder, extra }: TableFilterBarProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
@@ -24,6 +26,7 @@ export const TableFilterBar = ({ value, onChange, placeholder }: TableFilterBarP
         placeholder={placeholder ?? 'Ara...'}
         style={{ width: '100%', maxWidth: 320 }}
       />
+      {extra}
     </Flex>
   );
 };

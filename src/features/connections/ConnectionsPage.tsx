@@ -340,7 +340,7 @@ export const ConnectionsPage = () => {
 
     modal.confirm({
 
-      title: 'Bağlantı Kaydıni silmek istediginize emin misiniz?',
+      title: 'Bağlantı kaydını silmek istediğinize emin misiniz?',
 
       okText: 'Sil',
 
@@ -446,7 +446,7 @@ export const ConnectionsPage = () => {
 
     {
 
-      title: 'Program Surumu',
+      title: 'Program Versiyonu',
 
       dataIndex: 'programVersionId',
 
@@ -556,7 +556,7 @@ export const ConnectionsPage = () => {
           rowKey="id"
           dataSource={filteredConnections}
           columns={columns}
-          pagination={{ pageSize: 8 }}
+          pagination={{ pageSize: 7 }}
         />
       </SurfaceCard>
 
@@ -622,17 +622,17 @@ export const ConnectionsPage = () => {
 
               <Form.Item
 
-                label="Program Surumu"
+                label="Program Versiyonu"
 
                 name="programVersionId"
 
-                rules={[{ required: true, message: 'Program surumu Seçimi zorunludur.' }]}
+                rules={[{ required: true, message: 'Program sürümü seçimi zorunludur.' }]}
 
               >
 
                 <Select
 
-                  placeholder="Surum Seçin"
+                  placeholder="Sürüm Seçin"
 
                   options={filteredProgramVersions}
 
@@ -714,7 +714,7 @@ export const ConnectionsPage = () => {
 
                   { required: true, message: 'Bağlantı tipi zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalidir.' },
+                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
 
                 ]}
 
@@ -746,7 +746,7 @@ export const ConnectionsPage = () => {
 
                   name={field}
 
-                  rules={[{ max: 256, message: 'En fazla 256 karakter olmalidir.' }]}
+                  rules={[{ max: 256, message: 'En fazla 256 karakter olmalıdır.' }]}
 
                 >
 

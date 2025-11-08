@@ -17,6 +17,7 @@ import { ConnectionsPage } from '@/features/connections/ConnectionsPage';
 import { CompanyAddressesPage } from '@/features/companyAddresses/CompanyAddressesPage';
 import { CompanyRepresentativesPage } from '@/features/companyRepresentatives/CompanyRepresentativesPage';
 import { GeneralSettingsPage } from '@/features/settings/GeneralSettingsPage';
+import { DebugPage } from '@/features/debug/DebugPage';
 import { RequireMenu } from '@/features/auth/RequireMenu';
 import { ForbiddenPage } from '@/features/errors/ForbiddenPage';
 
@@ -28,17 +29,18 @@ const App = () => (
         <Route index element={<RequireMenu code="dashboard"><DashboardPage /></RequireMenu>} />
         <Route path="/kullanicilar" element={<RequireMenu code="users"><UsersPage /></RequireMenu>} />
         <Route path="/bayiler" element={<RequireMenu code="dealers"><DealersPage /></RequireMenu>} />
-        <Route path="/musteriler" element={<RequireMenu code="CUSTOMERS"><CustomersPage /></RequireMenu>} />
+        <Route path="/musteriler" element={<RequireMenu code="customers"><CustomersPage /></RequireMenu>} />
         <Route path="/uygulamalar" element={<RequireMenu code="apps"><AppsPage /></RequireMenu>} />
         <Route path="/programlar" element={<RequireMenu code="programs"><ProgramsPage /></RequireMenu>} />
         <Route path="/program-surumleri" element={<RequireMenu code="programVersions"><ProgramVersionsPage /></RequireMenu>} />
-        <Route path="/program-yayinlari" element={<RequireMenu code="PROGRAM_EDITIONS"><ProgramEditionsPage /></RequireMenu>} />
+        <Route path="/program-yayinlari" element={<RequireMenu code="programEditions"><ProgramEditionsPage /></RequireMenu>} />
         <Route path="/lisanslar" element={<RequireMenu code="licenses"><LicensesPage /></RequireMenu>} />
         <Route path="/yetkilendirmeler" element={<RequireMenu code="authorizations"><AuthorizationsPage /></RequireMenu>} />
         <Route path="/baglantilar" element={<RequireMenu code="connections"><ConnectionsPage /></RequireMenu>} />
         <Route path="/sirket-adresleri" element={<RequireMenu code="companyAddresses"><CompanyAddressesPage /></RequireMenu>} />
         <Route path="/sirket-temsilcileri" element={<RequireMenu code="companyRepresentatives"><CompanyRepresentativesPage /></RequireMenu>} />
         <Route path="/genel-ayarlar" element={<RequireMenu code="generalSettings"><GeneralSettingsPage /></RequireMenu>} />
+        <Route path="/debug" element={<DebugPage />} />
       </Route>
     </Route>
     <Route path="/403" element={<ForbiddenPage />} />
