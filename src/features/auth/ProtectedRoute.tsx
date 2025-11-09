@@ -1,11 +1,7 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-
-import { useAuth } from './AuthContext';
-
-
+import { Outlet } from 'react-router-dom';
 
 export const ProtectedRoute = () => {
-  // Authorization geçici olarak devre dışı - tüm sayfalar erişilebilir
+  // Authorization gecici olarak devre disi, bu yuzden tum route'lar aciktir.
   // const { isAuthenticated } = useAuth();
   // const location = useLocation();
 
@@ -15,6 +11,3 @@ export const ProtectedRoute = () => {
 
   return <Outlet />;
 };
-
-
-

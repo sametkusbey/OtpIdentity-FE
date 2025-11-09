@@ -66,9 +66,9 @@ try {
 }
 
 // Optional: bypass auth in production by auto-login with env creds
-const BYPASS_AUTH = (import.meta as any).env?.VITE_BYPASS_AUTH === 'true';
-const AUTH_USERNAME = (import.meta as any).env?.VITE_AUTH_USERNAME as string | undefined;
-const AUTH_PASSWORD = (import.meta as any).env?.VITE_AUTH_PASSWORD as string | undefined;
+// const BYPASS_AUTH = (import.meta as any).env?.VITE_BYPASS_AUTH === 'true';
+// const AUTH_USERNAME = (import.meta as any).env?.VITE_AUTH_USERNAME as string | undefined;
+// const AUTH_PASSWORD = (import.meta as any).env?.VITE_AUTH_PASSWORD as string | undefined;
 
 // Authorization devre dışı - bu fonksiyonlar geçici olarak kullanılmıyor
 // let authPromise: Promise<string | undefined> | null = null;
