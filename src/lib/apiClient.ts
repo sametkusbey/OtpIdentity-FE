@@ -53,6 +53,17 @@ export const setIsAdmin = (isAdmin: boolean) => {
   }
 };
 
+// Dealer code'u header'a set etmek için
+export const setDealerCode = (dealerCode?: string | null) => {
+  if (dealerCode && dealerCode.trim() !== '') {
+    apiClient.defaults.headers.common['X-Dealer-Code'] = dealerCode;
+    console.log('Dealer Code set:', dealerCode);
+  } else {
+    delete apiClient.defaults.headers.common['X-Dealer-Code'];
+    console.log('Dealer Code cleared');
+  }
+};
+
 // On load: pick up persisted token if any
 try {
   const t = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) ?? undefined;

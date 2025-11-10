@@ -601,7 +601,7 @@ export const AuthorizationsPage = () => {
 
               <Form.Item
 
-                label="Bayi"
+                label="Bayi/Müşteri"
 
                 name="dealerId"
 

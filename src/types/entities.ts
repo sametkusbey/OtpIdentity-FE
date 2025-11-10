@@ -21,16 +21,22 @@ export type UserDto = BaseEntity & {
 export type DealerDto = BaseEntity & {
   taxIdentifierNumber: string;
   title: string;
-  companyType: CompanyType;
-  city: string;
-  district: string;
+  companyTypeId: Guid;
+  cityId: Guid;
+  cityName: string;
+  districtId: Guid;
+  districtName: string;
   companyPhoneNumber: string;
   companyEmailAddress: string;
-  isCustomer: boolean;
   dealerCode?: string | null;
-  ownerPortalAccountId?: Guid | null;
+  isCustomer: boolean;
   parentDealerId?: Guid | null;
   userIds: Guid[];
+};
+
+export type CompanyTypeDto = BaseEntity & {
+  code: string;
+  name: string;
 };
 
 export type AppDto = BaseEntity & {
@@ -54,10 +60,6 @@ export type ProgramEditionDto = BaseEntity & {
   editionCode: string;
   editionName: string;
 };
-
-export enum CompanyType {
-  Limited = 1  // Şu anda sadece Limited şirket türü mevcut
-}
 
 export enum RenewalPeriodType {
   Day = 1,    // Günlük
@@ -87,7 +89,7 @@ export type ConnectionDto = BaseEntity & {
   programVersionId: Guid;
   appId: Guid;
   dealerId: Guid;
-  connectionType: string;
+  connectionTypeId: Guid;
   parameter1?: string | null;
   parameter2?: string | null;
   parameter3?: string | null;
@@ -95,12 +97,41 @@ export type ConnectionDto = BaseEntity & {
   parameter5?: string | null;
 };
 
+export type ConnectionTypeDto = BaseEntity & {
+  code: string;
+  name: string;
+  parameter1Name?: string | null;
+  parameter2Name?: string | null;
+  parameter3Name?: string | null;
+  parameter4Name?: string | null;
+  parameter5Name?: string | null;
+};
+
+export type CountryDto = BaseEntity & {
+  code: string;
+  name: string;
+};
+
+export type CityDto = BaseEntity & {
+  countryId: Guid;
+  name: string;
+  plateCode?: string | null;
+};
+
+export type DistrictDto = BaseEntity & {
+  cityId: Guid;
+  name: string;
+};
+
 export type CompanyAddressDto = BaseEntity & {
   dealerId: Guid;
   addressName: string;
-  country: string;
-  city: string;
-  district: string;
+  countryId: Guid;
+  countryName: string;
+  cityId: Guid;
+  cityName: string;
+  districtId: Guid;
+  districtName: string;
   town?: string | null;
   street: string;
   zipCode: string;

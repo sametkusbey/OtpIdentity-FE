@@ -11,15 +11,23 @@ import { SurfaceCard } from '@/components/layout/SurfaceCard';
 import { TableFilterBar } from '@/components/table/TableFilterBar';
 
 import { apiClient, type ApiError } from '@/lib/apiClient';
-import type { DealerDto, Guid } from '@/types/entities';
-import { CompanyType } from '@/types/entities';
+import type { DealerDto, Guid, CompanyTypeDto, CityDto, DistrictDto } from '@/types/entities';
+import { listCities } from '@/features/cities/api';
+import { listDistricts } from '@/features/districts/api';
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useCrudList } from '@/hooks/useCrud';
 import { listCustomers, createCustomer, updateCustomer, deleteCustomer, type CreateCustomerRequest, type UpdateCustomerRequest } from './api';
 
-type CustomerFormValues = Omit<CreateCustomerRequest, 'userIds' | 'isCustomer' | 'dealerCode'> & {
-  // userIds, isCustomer, dealerCode otomatik set edilir
+type CustomerFormValues = {
+  taxIdentifierNumber: string;
+  title: string;
+  companyTypeId: Guid;
+  cityId: Guid;
+  districtId: Guid;
+  companyPhoneNumber: string;
+  companyEmailAddress: string;
 };
 
 export const CustomersPage = () => {
@@ -29,6 +37,53 @@ export const CustomersPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<Guid | null>(null);
+  const { data: companyTypes } = useCrudList<CompanyTypeDto>('companytypes');
+  
+  // Bayileri çek (parent dealer bilgisi için)
+  const { data: allDealers } = useCrudList<DealerDto>('Dealers');
+  
+  const [cities, setCities] = useState<CityDto[]>([]);
+  const [districts, setDistricts] = useState<DistrictDto[]>([]);
+  const [selectedCityId, setSelectedCityId] = useState<Guid | null>(null);
+  
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const turkeyId = 'd4e5f6a7-b8c9-4d3e-a2f1-123456789abc';
+        const citiesData = await listCities(turkeyId);
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Şehirler yüklenemedi:', error);
+      }
+    };
+    loadCities();
+  }, []);
+
+  useEffect(() => {
+    const loadDistricts = async () => {
+      if (selectedCityId) {
+        try {
+          const districtsData = await listDistricts(selectedCityId);
+          setDistricts(districtsData);
+        } catch (error) {
+          console.error('İlçeler yüklenemedi:', error);
+        }
+      } else {
+        setDistricts([]);
+      }
+    };
+    loadDistricts();
+  }, [selectedCityId]);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      form.resetFields();
+      setEditingId(null);
+      setSelectedCityId(null);
+      setDistricts([]);
+    }
+  }, [isModalOpen, form]);
+  
   const listQuery = useQuery<DealerDto[], ApiError>({
     queryKey: ['customers'],
     queryFn: async () => {
@@ -86,9 +141,12 @@ export const CustomersPage = () => {
       await refetch();
       message.success('Müşteri oluşturuldu.');
     },
+    onError: (error) => {
+      message.error(error.message || 'Müşteri oluşturulurken bir hata oluştu.');
+    },
   });
 
-  const updateMutation = useMutation<DealerDto, ApiError, { id: Guid; payload: CustomerFormValues }>({
+  const updateMutation = useMutation<DealerDto, ApiError, { id: Guid; payload: Partial<CustomerFormValues> }>({
     mutationFn: async ({ id, payload }) => {
       // Dokümantasyona göre updateCustomer API'sini kullan
       // İş Mantığı:
@@ -105,6 +163,9 @@ export const CustomersPage = () => {
       await refetch();
       message.success('Müşteri güncellendi.');
     },
+    onError: (error) => {
+      message.error(error.message || 'Müşteri güncellenirken bir hata oluştu.');
+    },
   });
 
   const deleteMutation = useMutation<unknown, ApiError, Guid>({
@@ -116,11 +177,23 @@ export const CustomersPage = () => {
       await refetch();
       message.success('Müşteri silindi.');
     },
+    onError: (error) => {
+      message.error(error.message || 'Müşteri silinirken bir hata oluştu.');
+    },
   });
 
   const data = listQuery.data ?? [];
   const [search, setSearch] = useState('');
   const filtered = useMemo(() => filterByQuery(data, search), [data, search]);
+
+  const companyTypeOptions = useMemo(
+    () =>
+      companyTypes?.map((ct) => ({
+        label: ct.name,
+        value: ct.id,
+      })) ?? [],
+    [companyTypes],
+  );
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -159,13 +232,21 @@ export const CustomersPage = () => {
       }
       
       setEditingId(id);
+      
+      // Şehir seçili ise ilçeleri yükle
+      if (entity.cityId) {
+        setSelectedCityId(entity.cityId);
+        const districtsData = await listDistricts(entity.cityId);
+        setDistricts(districtsData);
+      }
+      
       setIsModalOpen(true);
       form.setFieldsValue({
         taxIdentifierNumber: entity.taxIdentifierNumber,
         title: entity.title,
-        companyType: entity.companyType,
-        city: entity.city,
-        district: entity.district,
+        companyTypeId: entity.companyTypeId,
+        cityId: entity.cityId,
+        districtId: entity.districtId,
         companyPhoneNumber: entity.companyPhoneNumber,
         companyEmailAddress: entity.companyEmailAddress,
       } as CustomerFormValues);
@@ -177,23 +258,40 @@ export const CustomersPage = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const payload: CustomerFormValues = {
-        taxIdentifierNumber: String(values.taxIdentifierNumber || '').trim(),
-        title: String(values.title || '').trim(),
-        companyType: Number(values.companyType),
-        city: String(values.city || '').trim(),
-        district: String(values.district || '').trim(),
-        companyPhoneNumber: String(values.companyPhoneNumber || '').trim(),
-        companyEmailAddress: String(values.companyEmailAddress || '').trim(),
-      } as CustomerFormValues;
-      if (editingId) {
-        await updateMutation.mutateAsync({ id: editingId, payload });
-      } else {
+      
+      console.log('Form Values (Customers):', values);
+      
+      if (!editingId) {
+        // Yeni kayıt - tüm alanlar dahil
+        const payload: CustomerFormValues = {
+          taxIdentifierNumber: String(values.taxIdentifierNumber || '').trim(),
+          title: String(values.title || '').trim(),
+          companyTypeId: values.companyTypeId,
+          cityId: values.cityId,
+          districtId: values.districtId,
+          companyPhoneNumber: String(values.companyPhoneNumber || '').trim(),
+          companyEmailAddress: String(values.companyEmailAddress || '').trim(),
+        };
+        console.log('Payload to be sent (Create Customer):', payload);
         await createMutation.mutateAsync(payload);
+      } else {
+        // Güncelleme - taxIdentifierNumber hariç
+        const payload: Partial<CustomerFormValues> = {
+          title: String(values.title || '').trim(),
+          companyTypeId: values.companyTypeId,
+          cityId: values.cityId,
+          districtId: values.districtId,
+          companyPhoneNumber: String(values.companyPhoneNumber || '').trim(),
+          companyEmailAddress: String(values.companyEmailAddress || '').trim(),
+        };
+        console.log('Payload to be sent (Update Customer):', payload);
+        await updateMutation.mutateAsync({ id: editingId, payload });
       }
+      
       setIsModalOpen(false);
       setEditingId(null);
     } catch (e) {
+      console.error('Submit error (Customers):', e);
       const err = e as ApiError;
       applyValidationErrors(err, form);
     }
@@ -212,30 +310,57 @@ export const CustomersPage = () => {
     });
   };
 
-  const columns: ColumnsType<DealerDto> = [
-    { title: 'Unvan', dataIndex: 'title' },
-    { title: 'Vergi No', dataIndex: 'taxIdentifierNumber' },
-    { title: 'Şehir', dataIndex: 'city' },
-    { title: 'İlçe', dataIndex: 'district' },
-    { title: 'Telefon', dataIndex: 'companyPhoneNumber' },
-    { title: 'E-posta', dataIndex: 'companyEmailAddress' },
-    { title: 'Müşteri mi?', dataIndex: 'isCustomer', render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? 'Evet' : 'Hayır'}</Tag> },
-    {
-      title: 'İşlemler',
-      key: 'actions',
-      width: 160,
-      render: (_, record) => (
-        <Space>
-          <Tooltip title="Düzenle">
-            <Button icon={<EditOutlined />} onClick={() => void openEdit(record.id)} />
-          </Tooltip>
-          <Tooltip title="Sil">
-            <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
+  // Parent dealer map oluştur
+  const dealerMap = useMemo(() => {
+    const map = new Map<Guid, DealerDto>();
+    allDealers?.forEach((dealer) => map.set(dealer.id, dealer));
+    return map;
+  }, [allDealers]);
+
+  const columns: ColumnsType<DealerDto> = useMemo(() => {
+    const baseColumns: ColumnsType<DealerDto> = [
+      { title: 'Unvan', dataIndex: 'title' },
+      { title: 'Vergi No', dataIndex: 'taxIdentifierNumber' },
+      { title: 'Şehir', dataIndex: 'cityName' },
+      { title: 'İlçe', dataIndex: 'districtName' },
+      { title: 'Telefon', dataIndex: 'companyPhoneNumber' },
+      { title: 'E-posta', dataIndex: 'companyEmailAddress' },
+    ];
+
+    // Sadece admin kullanıcılar için "Bağlı Olduğu Bayi" kolonunu ekle
+    if (user?.isAdmin) {
+      baseColumns.push({
+        title: 'Bağlı Olduğu Bayi', 
+        dataIndex: 'parentDealerId',
+        render: (parentDealerId: Guid | null | undefined) => {
+          if (!parentDealerId) return '-';
+          const parentDealer = dealerMap.get(parentDealerId);
+          return parentDealer ? parentDealer.title : '-';
+        }
+      });
+    }
+
+    baseColumns.push(
+      { title: 'Müşteri mi?', dataIndex: 'isCustomer', render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? 'Evet' : 'Hayır'}</Tag> },
+      {
+        title: 'İşlemler',
+        key: 'actions',
+        width: 160,
+        render: (_, record) => (
+          <Space>
+            <Tooltip title="Düzenle">
+              <Button icon={<EditOutlined />} onClick={() => void openEdit(record.id)} />
+            </Tooltip>
+            <Tooltip title="Sil">
+              <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+            </Tooltip>
+          </Space>
+        ),
+      }
+    );
+
+    return baseColumns;
+  }, [user?.isAdmin, dealerMap]);
 
   if (listQuery.isLoading) return <LoadingState text="Müşteriler yükleniyor..." />;
   if (listQuery.isError || !data) return <ErrorState onRetry={() => void refetch()} subtitle="Müşteriler alınırken bir hata oluştu." />;
@@ -290,11 +415,11 @@ export const CustomersPage = () => {
         cancelText="Vazgeç"
         width={640}
       >
-        <Form<CustomerFormValues> form={form} layout="vertical" initialValues={{ companyType: CompanyType.Limited }}>
+        <Form<CustomerFormValues> form={form} layout="vertical" initialValues={{ companyTypeId: undefined }}>
           <Row gutter={[18, 18]}>
             <Col xs={24} md={12}>
               <Form.Item label="Vergi No" name="taxIdentifierNumber" rules={[{ required: true, message: 'Vergi no zorunludur.' }, { max: 32 }]}>
-                <Input placeholder="Vergi no" />
+                <Input placeholder="Vergi no" disabled={!!editingId} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -303,18 +428,45 @@ export const CustomersPage = () => {
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Şirket Türü" name="companyType" rules={[{ required: true, message: 'Şirket türü zorunludur.' }]}>
-                <Select options={[{ value: CompanyType.Limited, label: 'Limited' }]} placeholder="Şirket türü" />
+              <Form.Item label="Şirket Türü" name="companyTypeId" rules={[{ required: true, message: 'Şirket türü zorunludur.' }]}>
+                <Select options={companyTypeOptions} placeholder="Şirket türü seçin" showSearch optionFilterProp="label" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="Şehir" name="city" rules={[{ required: true }, { max: 64 }]}>
-                <Input placeholder="Şehir" />
+              <Form.Item label="Şehir" name="cityId" rules={[{ required: true, message: 'Şehir zorunludur.' }]}>
+                <Select
+                  placeholder="Şehir seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  onChange={(value) => {
+                    setSelectedCityId(value);
+                    form.setFieldValue('districtId', undefined);
+                  }}
+                  options={cities.map((city) => ({
+                    label: city.name,
+                    value: city.id,
+                  }))}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item label="İlçe" name="district" rules={[{ required: true }, { max: 64 }]}>
-                <Input placeholder="İlçe" />
+              <Form.Item label="İlçe" name="districtId" rules={[{ required: true, message: 'İlçe zorunludur.' }]}>
+                <Select
+                  placeholder="Önce şehir seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  disabled={!selectedCityId}
+                  options={districts.map((district) => ({
+                    label: district.name,
+                    value: district.id,
+                  }))}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>

@@ -30,6 +30,8 @@ import {
 
   Table,
 
+  Tag,
+
   Tooltip,
 
 } from 'antd';
@@ -75,6 +77,8 @@ import type { ApiError } from '@/lib/apiClient';
 
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
+import { listDealersForCompanyAddresses } from '@/features/dealers/api';
+import { useQuery } from '@tanstack/react-query';
 
 
 
@@ -106,7 +110,14 @@ export const CompanyRepresentativesPage = () => {
 
   } = useCrudList<CompanyRepresentativeDto>('companyrepresentatives');
 
-  const { data: dealers } = useCrudList<DealerDto>('dealers');
+  // Şirket temsilcileri için özel endpoint kullan - sadece yetkili müşterileri getirir
+  const { data: dealers, refetch: refetchDealers } = useQuery<DealerDto[], ApiError>({
+    queryKey: ['dealers', 'for-company-addresses'],
+    queryFn: listDealersForCompanyAddresses,
+    staleTime: 0, // Her zaman fresh data çek
+    refetchOnMount: true, // Sayfa mount olduğunda refetch et
+    refetchOnWindowFocus: false, // Window focus'ta refetch etme (isteğe bağlı)
+  });
 
 
 
@@ -150,9 +161,12 @@ export const CompanyRepresentativesPage = () => {
 
       setEditingId(null);
 
+    } else {
+      // Modal açıldığında dealers'ı refetch et
+      void refetchDealers();
     }
 
-  }, [form, isModalOpen]);
+  }, [form, isModalOpen, refetchDealers]);
 
 
 
@@ -162,7 +176,7 @@ export const CompanyRepresentativesPage = () => {
 
       dealers?.map((dealer) => ({
 
-        label: dealer.title,
+        label: `${dealer.title} ${dealer.isCustomer ? '(Müşteri)' : '(Bayi)'}`,
 
         value: dealer.id,
 
@@ -292,11 +306,22 @@ export const CompanyRepresentativesPage = () => {
 
     {
 
-      title: 'Bayi',
+      title: 'Bayi/Müşteri',
 
       dataIndex: 'dealerId',
 
-      render: (value: Guid) => dealerMap.get(value)?.title ?? '-',
+      render: (value: Guid) => {
+        const dealer = dealerMap.get(value);
+        if (!dealer) return '-';
+        return (
+          <span>
+            {dealer.title}{' '}
+            <Tag color={dealer.isCustomer ? 'blue' : 'green'}>
+              {dealer.isCustomer ? 'Müşteri' : 'Bayi'}
+            </Tag>
+          </span>
+        );
+      },
 
     },
 
@@ -462,7 +487,7 @@ export const CompanyRepresentativesPage = () => {
 
               <Form.Item
 
-                label="Bayi"
+                label="Bayi/Müşteri"
 
                 name="dealerId"
 

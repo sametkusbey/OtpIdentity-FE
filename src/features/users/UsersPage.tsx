@@ -13,7 +13,6 @@ import {
   Row,
   Select,
   Space,
-  Switch,
   Table,
   Tag,
   Tooltip,
@@ -36,6 +35,8 @@ import type { ApiError } from '@/lib/apiClient';
 import type { AppDto, DealerDto, Guid, UserDto } from '@/types/entities';
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
+import { listDealersForCompanyAddresses } from '@/features/dealers/api';
+import { useQuery } from '@tanstack/react-query';
 
 type UserFormValues = Omit<UserDto, 'id'>;
 
@@ -51,7 +52,14 @@ export const UsersPage = () => {
     isError,
     refetch,
   } = useCrudList<UserDto>('users');
-  const { data: dealers } = useCrudList<DealerDto>('dealers');
+  // Kullanıcılar için özel endpoint kullan - sadece yetkili müşterileri getirir
+  const { data: dealers, refetch: refetchDealers } = useQuery<DealerDto[], ApiError>({
+    queryKey: ['dealers', 'for-company-addresses'],
+    queryFn: listDealersForCompanyAddresses,
+    staleTime: 0, // Her zaman fresh data çek
+    refetchOnMount: true, // Sayfa mount olduğunda refetch et
+    refetchOnWindowFocus: false, // Window focus'ta refetch etme (isteğe bağlı)
+  });
   const { data: apps } = useCrudList<AppDto>('apps');
 
   const createMutation = useCreateMutation<UserFormValues>('users', {
@@ -68,17 +76,26 @@ export const UsersPage = () => {
     if (!isModalOpen) {
       form.resetFields();
       setEditingId(null);
+    } else {
+      // Modal açıldığında dealers'ı refetch et
+      void refetchDealers();
     }
-  }, [form, isModalOpen]);
+  }, [form, isModalOpen, refetchDealers]);
 
   const dealerOptions = useMemo(
     () =>
       dealers?.map((dealer) => ({
-        label: dealer.title,
+        label: `${dealer.title} ${dealer.isCustomer ? '(Müşteri)' : '(Bayi)'}`,
         value: dealer.id,
       })) ?? [],
     [dealers],
   );
+
+  const dealerMap = useMemo(() => {
+    const map = new Map<Guid, DealerDto>();
+    dealers?.forEach((dealer) => map.set(dealer.id, dealer));
+    return map;
+  }, [dealers]);
 
   const appOptions = useMemo(
     () =>
@@ -103,8 +120,6 @@ export const UsersPage = () => {
         lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        isEmailVerified: user.isEmailVerified,
-        isPhoneNumberVerified: user.isPhoneNumberVerified,
         identityNumber: user.identityNumber,
         dealerIds: user.dealerIds,
         appIds: user.appIds,
@@ -184,11 +199,24 @@ export const UsersPage = () => {
       ),
     },
     {
-      title: 'Bayiler',
+      title: 'Bayiler/Müşteriler',
       dataIndex: 'dealerIds',
-      render: (dealerIds: Guid[]) => (
-        <>{dealers?.filter((d) => dealerIds?.includes(d.id)).map((d) => d.title).join(', ')}</>
-      ),
+      render: (dealerIds: Guid[]) => {
+        if (!dealerIds || dealerIds.length === 0) return '-';
+        return (
+          <Space size={[0, 8]} wrap>
+            {dealerIds.map((dealerId) => {
+              const dealer = dealerMap.get(dealerId);
+              if (!dealer) return null;
+              return (
+                <Tag key={dealerId} color={dealer.isCustomer ? 'blue' : 'green'}>
+                  {dealer.title}
+                </Tag>
+              );
+            })}
+          </Space>
+        );
+      },
     },
     {
       title: 'Uygulamalar',
@@ -270,7 +298,6 @@ export const UsersPage = () => {
         <Form
           form={form}
           layout="vertical"
-          initialValues={{ isEmailVerified: false, isPhoneNumberVerified: false }}
         >
           <Row gutter={16}>
             <Col span={12}>
@@ -317,14 +344,13 @@ export const UsersPage = () => {
               <Form.Item
                 label="Kimlik No"
                 name="identityNumber"
-                rules={[{ required: true, message: 'Kimlik numarası zorunlu.' }]}
               >
                 <Input placeholder="Kimlik numaranızı girin" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label="Bayiler"
+                label="Bayi/Müşteri"
                 name="dealerIds"
               >
                 <Select
@@ -337,7 +363,7 @@ export const UsersPage = () => {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={24}>
               <Form.Item
                 label="Uygulamalar"
                 name="appIds"
@@ -348,22 +374,6 @@ export const UsersPage = () => {
                   options={appOptions}
                   placeholder="Uygulama seçiniz"
                 />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="E-posta Doğrulandı"
-                name="isEmailVerified"
-                valuePropName="checked"
-              >
-                <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
-              </Form.Item>
-              <Form.Item
-                label="Telefon Doğrulandı"
-                name="isPhoneNumberVerified"
-                valuePropName="checked"
-              >
-                <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
               </Form.Item>
             </Col>
           </Row>

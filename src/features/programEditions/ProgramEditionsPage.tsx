@@ -272,7 +272,7 @@ export const ProgramEditionsPage = () => {
                   }),
                 ]}
               >
-                <Input placeholder="RUN" />
+                <Input placeholder="RUN" disabled={!!editingId} />
               </Form.Item>
             </Col>
             <Col xs={24} md={24}>

@@ -512,7 +512,7 @@ export const ProgramVersionsPage = () => {
 
               >
 
-                <Input placeholder="Örn. v1.0.0" />
+                <Input placeholder="Örn. v1.0.0" disabled={!!editingId} />
 
               </Form.Item>
 

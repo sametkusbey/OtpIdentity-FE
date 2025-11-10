@@ -30,6 +30,8 @@ import {
 
   Table,
 
+  Tag,
+
   Tooltip,
 
 } from 'antd';
@@ -67,6 +69,8 @@ import type {
 
   ConnectionDto,
 
+  ConnectionTypeDto,
+
   DealerDto,
 
   Guid,
@@ -81,6 +85,8 @@ import type { ApiError } from '@/lib/apiClient';
 
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
+import { listDealersForCompanyAddresses } from '@/features/dealers/api';
+import { useQuery } from '@tanstack/react-query';
 
 
 
@@ -110,31 +116,40 @@ export const ConnectionsPage = () => {
 
     refetch,
 
-  } = useCrudList<ConnectionDto>('connections');
+  } = useCrudList<ConnectionDto>('Connections');
 
-  const { data: programs } = useCrudList<ProgramDto>('programs');
+  const { data: programs } = useCrudList<ProgramDto>('Programs');
 
-  const { data: programVersions } = useCrudList<ProgramVersionDto>('versions');
+  const { data: programVersions } = useCrudList<ProgramVersionDto>('Versions');
 
-  const { data: dealers } = useCrudList<DealerDto>('dealers');
+  const { data: connectionTypes } = useCrudList<ConnectionTypeDto>('ConnectionTypes');
 
-  const { data: apps } = useCrudList<AppDto>('apps');
+  // Bağlantılar için özel endpoint kullan - sadece yetkili müşterileri getirir
+  const { data: dealers, refetch: refetchDealers } = useQuery<DealerDto[], ApiError>({
+    queryKey: ['dealers', 'for-company-addresses'],
+    queryFn: listDealersForCompanyAddresses,
+    staleTime: 0, // Her zaman fresh data çek
+    refetchOnMount: true, // Sayfa mount olduğunda refetch et
+    refetchOnWindowFocus: false, // Window focus'ta refetch etme (isteğe bağlı)
+  });
+
+  const { data: apps } = useCrudList<AppDto>('Apps');
 
 
 
-  const createMutation = useCreateMutation<ConnectionFormValues>('connections', {
+  const createMutation = useCreateMutation<ConnectionFormValues>('Connections', {
 
     successMessage: 'Bağlantı Oluşturuldu.',
 
   });
 
-  const updateMutation = useUpdateMutation<ConnectionFormValues>('connections', {
+  const updateMutation = useUpdateMutation<ConnectionFormValues>('Connections', {
 
     successMessage: 'Bağlantı Güncellendi.',
 
   });
 
-  const deleteMutation = useDeleteMutation('connections', {
+  const deleteMutation = useDeleteMutation('Connections', {
 
     successMessage: 'Bağlantı silindi.',
 
@@ -150,9 +165,12 @@ export const ConnectionsPage = () => {
 
       setEditingId(null);
 
+    } else {
+      // Modal açıldığında dealers'ı refetch et
+      void refetchDealers();
     }
 
-  }, [form, isModalOpen]);
+  }, [form, isModalOpen, refetchDealers]);
 
 
 
@@ -168,7 +186,7 @@ export const ConnectionsPage = () => {
 
       dealers?.map((dealer) => ({
 
-        label: dealer.title,
+        label: `${dealer.title} ${dealer.isCustomer ? '(Müşteri)' : '(Bayi)'}`,
 
         value: dealer.id,
 
@@ -253,6 +271,7 @@ export const ConnectionsPage = () => {
 
 
   const selectedProgramId = Form.useWatch('programId', form) as Guid | undefined;
+  const selectedConnectionTypeId = Form.useWatch('connectionTypeId', form) as Guid | undefined;
 
 
 
@@ -288,6 +307,32 @@ export const ConnectionsPage = () => {
 
   }, [programVersions]);
 
+  const connectionTypeMap = useMemo(() => {
+
+    const map = new Map<Guid, ConnectionTypeDto>();
+
+    connectionTypes?.forEach((type) => map.set(type.id, type));
+
+    return map;
+
+  }, [connectionTypes]);
+
+  const connectionTypeOptions = useMemo(
+
+    () =>
+
+      connectionTypes?.map((type) => ({
+
+        label: type.name,
+
+        value: type.id,
+
+      })) ?? [],
+
+    [connectionTypes],
+
+  );
+
   const openCreateModal = () => setIsModalOpen(true);
 
 
@@ -296,7 +341,7 @@ export const ConnectionsPage = () => {
 
     try {
 
-      const connection = await fetchEntityById<ConnectionDto>('connections', id);
+      const connection = await fetchEntityById<ConnectionDto>('Connections', id);
 
       setEditingId(id);
 
@@ -310,7 +355,7 @@ export const ConnectionsPage = () => {
 
         dealerId: connection.dealerId,
 
-        connectionType: connection.connectionType,
+        connectionTypeId: connection.connectionTypeId,
 
         parameter1: connection.parameter1 ?? undefined,
 
@@ -416,11 +461,22 @@ export const ConnectionsPage = () => {
 
     {
 
-      title: 'Bayi',
+      title: 'Bayi/Müşteri',
 
       dataIndex: 'dealerId',
 
-      render: (value: Guid) => dealerMap.get(value)?.title ?? '-',
+      render: (value: Guid) => {
+        const dealer = dealerMap.get(value);
+        if (!dealer) return '-';
+        return (
+          <span>
+            {dealer.title}{' '}
+            <Tag color={dealer.isCustomer ? 'blue' : 'green'}>
+              {dealer.isCustomer ? 'Müşteri' : 'Bayi'}
+            </Tag>
+          </span>
+        );
+      },
 
     },
 
@@ -458,7 +514,9 @@ export const ConnectionsPage = () => {
 
       title: 'Bağlantı Tipi',
 
-      dataIndex: 'connectionType',
+      dataIndex: 'connectionTypeId',
+
+      render: (value: Guid) => connectionTypeMap.get(value)?.name ?? '-',
 
     },
 
@@ -678,7 +736,7 @@ export const ConnectionsPage = () => {
 
               <Form.Item
 
-                label="Bayi"
+                label="Bayi/Müşteri"
 
                 name="dealerId"
 
@@ -708,55 +766,97 @@ export const ConnectionsPage = () => {
 
                 label="Bağlantı Tipi"
 
-                name="connectionType"
+                name="connectionTypeId"
 
-                rules={[
-
-                  { required: true, message: 'Bağlantı tipi zorunludur.' },
-
-                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
-
-                ]}
+                rules={[{ required: true, message: 'Bağlantı tipi zorunludur.' }]}
 
               >
 
-                <Input placeholder="Bağlantı tipi" />
+                <Select
+
+                  placeholder="Bağlantı Tipi Seçin"
+
+                  options={connectionTypeOptions}
+
+                  showSearch
+
+                  optionFilterProp="label"
+
+                  onChange={() => {
+
+                    // Bağlantı tipi değiştiğinde parametreleri temizle
+
+                    form.setFieldsValue({
+
+                      parameter1: undefined,
+
+                      parameter2: undefined,
+
+                      parameter3: undefined,
+
+                      parameter4: undefined,
+
+                      parameter5: undefined,
+
+                    });
+
+                  }}
+
+                />
 
               </Form.Item>
 
             </Col>
 
-            {(['parameter1', 'parameter2', 'parameter3', 'parameter4', 'parameter5'] as Array<
+            {/* Dinamik parametreler - sadece seçili bağlantı tipine göre */}
 
-              keyof Pick<
+            {selectedConnectionTypeId && (() => {
 
-                ConnectionFormValues,
+              const selectedType = connectionTypeMap.get(selectedConnectionTypeId);
 
-                'parameter1' | 'parameter2' | 'parameter3' | 'parameter4' | 'parameter5'
+              if (!selectedType) return null;
 
-              >
+              
 
-            >).map((field, index) => (
+              const params = [
 
-              <Col xs={24} md={12} key={field}>
+                { name: 'parameter1', label: selectedType.parameter1Name },
 
-                <Form.Item
+                { name: 'parameter2', label: selectedType.parameter2Name },
 
-                  label={`Parametre ${index + 1}`}
+                { name: 'parameter3', label: selectedType.parameter3Name },
 
-                  name={field}
+                { name: 'parameter4', label: selectedType.parameter4Name },
 
-                  rules={[{ max: 256, message: 'En fazla 256 karakter olmalıdır.' }]}
+                { name: 'parameter5', label: selectedType.parameter5Name },
 
-                >
+              ].filter(p => p.label); // Sadece dolu olanları göster
 
-                  <Input placeholder="Opsiyonel parametre" />
 
-                </Form.Item>
 
-              </Col>
+              return params.map((param) => (
 
-            ))}
+                <Col xs={24} md={12} key={param.name}>
+
+                  <Form.Item
+
+                    label={param.label}
+
+                    name={param.name}
+
+                    rules={[{ max: 256, message: 'En fazla 256 karakter olmalıdır.' }]}
+
+                  >
+
+                    <Input placeholder={param.label ?? ''} />
+
+                  </Form.Item>
+
+                </Col>
+
+              ));
+
+            })()}
 
           </Row>
 

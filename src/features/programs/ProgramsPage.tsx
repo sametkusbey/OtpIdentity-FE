@@ -365,7 +365,7 @@ export const ProgramsPage = () => {
 
           >
 
-            <Input placeholder="Örn. SAP" />
+            <Input placeholder="Örn. SAP" disabled={!!editingId} />
 
           </Form.Item>
 

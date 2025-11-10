@@ -1,27 +1,26 @@
 import { apiClient } from '@/lib/apiClient';
 import type { Result } from '@/types/portal';
-import type { DealerDto } from '@/types/entities';
-import { CompanyType } from '@/types/entities';
+import type { DealerDto, Guid } from '@/types/entities';
 
 // Dealers API - Dokümantasyona göre /api/dealers endpoint'leri
 
 export interface CreateDealerRequest {
   taxIdentifierNumber: string;
   title: string;
-  companyType: CompanyType;
+  companyTypeId: Guid;
   city: string;
   district: string;
   companyPhoneNumber: string;
   companyEmailAddress: string;
-  isCustomer: boolean; // Bayi için false olmalı
-  dealerCode?: string;
+  dealerCode: string;
   userIds?: string[];
+  // isCustomer backend'de otomatik false set ediliyor
 }
 
 export interface UpdateDealerRequest {
   taxIdentifierNumber?: string;
   title?: string;
-  companyType?: CompanyType;
+  companyTypeId?: Guid;
   city?: string;
   district?: string;
   companyPhoneNumber?: string;
@@ -73,11 +72,7 @@ export async function getDealer(id: string): Promise<DealerDto> {
 }
 
 export async function createDealer(request: CreateDealerRequest): Promise<DealerDto> {
-  // Validasyon - IsCustomer=false olmalı (müşteriler için CustomersController kullanılmalı)
-  if (request.isCustomer) {
-    throw new Error('Müşteri oluşturma işlemi için /api/customers endpoint\'ini kullanın.');
-  }
-  
+  // Backend otomatik olarak isCustomer: false set ediyor
   const res = await apiClient.post<Result<DealerDto>>('/dealers', request);
   const payload = res.data as unknown as Result<DealerDto> | DealerDto;
   
@@ -114,4 +109,25 @@ export async function deleteDealer(id: string): Promise<void> {
     const succeeded = result.succeeded ?? result.isSuccess;
     if (!succeeded) throw new Error(result.message ?? 'Bayi silinemedi');
   }
+}
+
+/**
+ * Şirket adresleri için bayileri ve müşterileri getirir.
+ * Admin kullanıcılar tüm kayıtları görebilir.
+ * Normal kullanıcılar sadece kendi bayilerinin müşterilerini görebilir.
+ */
+export async function listDealersForCompanyAddresses(): Promise<DealerDto[]> {
+  const res = await apiClient.get<Result<DealerDto[]>>('/dealers/for-company-addresses');
+  const payload = res.data as unknown as Result<DealerDto[]> | DealerDto[];
+  
+  if (Array.isArray(payload)) return payload as DealerDto[];
+  
+  if (payload && typeof payload === 'object' && ('succeeded' in payload || 'isSuccess' in payload)) {
+    const result = payload as any;
+    const succeeded = result.succeeded ?? result.isSuccess;
+    if (!succeeded) throw new Error(result.message ?? 'Müşteriler alınamadı');
+    return result.data as DealerDto[];
+  }
+  
+  return [];
 }

@@ -1,7 +1,6 @@
 import { apiClient } from '@/lib/apiClient';
 import type { Result } from '@/types/portal';
-import type { DealerDto } from '@/types/entities';
-import { CompanyType } from '@/types/entities';
+import type { DealerDto, Guid } from '@/types/entities';
 
 // Customers API - Dokümantasyona göre /api/customers endpoint'leri
 // [Authorize] Required - JWT token gerekli
@@ -9,9 +8,9 @@ import { CompanyType } from '@/types/entities';
 export interface CreateCustomerRequest {
   taxIdentifierNumber: string;
   title: string;
-  companyType: CompanyType;
-  city: string;
-  district: string;
+  companyTypeId: Guid;
+  cityId: Guid;
+  districtId: Guid;
   companyPhoneNumber: string;
   companyEmailAddress: string;
   // Backend için gerekli alanlar:
@@ -21,15 +20,14 @@ export interface CreateCustomerRequest {
 }
 
 export interface UpdateCustomerRequest {
-  taxIdentifierNumber?: string;
   title?: string;
-  companyType?: CompanyType;
-  city?: string;
-  district?: string;
+  companyTypeId?: Guid;
+  cityId?: Guid;
+  districtId?: Guid;
   companyPhoneNumber?: string;
   companyEmailAddress?: string;
   userIds?: string[];
-  // dealerCode korunur (değiştirilmez)
+  // taxIdentifierNumber ve dealerCode korunur (değiştirilemez)
 }
 
 export async function listCustomers(): Promise<DealerDto[]> {
@@ -81,9 +79,9 @@ export async function createCustomer(request: CreateCustomerRequest): Promise<De
   const customerRequest = {
     taxIdentifierNumber: request.taxIdentifierNumber,
     title: request.title,
-    companyType: request.companyType,
-    city: request.city,
-    district: request.district,
+    companyTypeId: request.companyTypeId,
+    cityId: request.cityId,
+    districtId: request.districtId,
     companyPhoneNumber: request.companyPhoneNumber,
     companyEmailAddress: request.companyEmailAddress,
     isCustomer: true, // Her zaman true

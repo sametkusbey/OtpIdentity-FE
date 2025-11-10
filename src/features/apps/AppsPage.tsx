@@ -374,7 +374,7 @@ export const AppsPage = () => {
 
           >
 
-            <Input placeholder="Örn. OTPPORTAL" />
+            <Input placeholder="Örn. OTPPORTAL" disabled={!!editingId} />
 
           </Form.Item>
 

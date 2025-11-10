@@ -190,11 +190,21 @@ export const GeneralSettingsPage = () => {
       try {
         // Mevcut menüleri çek ve form'a set et
         const assigned = await getPortalAccountMenus(acc.id);
+        
+        // dealerCode'dan dealerId'yi bul
+        let ownedDealerId: string | null = null;
+        if (acc.dealerCode) {
+          const dealer = dealers.find(d => d.dealerCode === acc.dealerCode);
+          if (dealer) {
+            ownedDealerId = dealer.id;
+          }
+        }
+        
         updateForm.setFieldsValue({
           isActive: acc.isActive,
           password: undefined,
           menuIds: assigned.map((m) => m.id),
-          ownedDealerId: undefined, // Bu bilgi getPortalAccount'tan gelmiyor, gerekirse ayrı endpoint
+          ownedDealerId: ownedDealerId,
         });
       } catch {
         updateForm.setFieldsValue({ 
@@ -346,7 +356,7 @@ export const GeneralSettingsPage = () => {
             <Select mode="multiple" allowClear options={menus.map((m) => ({ label: m.menuName, value: m.id }))} placeholder="Yetkili menüleri seçin" />
           </Form.Item>
           <Form.Item
-            label="Bağlı Bayi"
+            label="Bayi/Müşteri"
             name="dealerId"
             rules={[{ required: true, message: 'Bayi seçimi zorunludur.' }]}
           >

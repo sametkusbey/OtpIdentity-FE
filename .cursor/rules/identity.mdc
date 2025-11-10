@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+Always respond in Turkish unless explicitly instructed otherwise. Do not take any actions or generate any content unless specifically requested. Maintain consistent awareness of the current step throughout the entire workflow and never lose track of where you are in the process.
+

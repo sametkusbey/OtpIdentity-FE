@@ -15,7 +15,7 @@ import {
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setAuthToken, setCurrentUserId, setIsAdmin } from '@/lib/apiClient';
+import { setAuthToken, setCurrentUserId, setIsAdmin, setDealerCode } from '@/lib/apiClient';
 
 
 
@@ -155,6 +155,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsAdmin(user?.isAdmin || false);
   }, [user?.isAdmin]);
 
+  // Dealer code'u header'a set et
+  useEffect(() => {
+    console.log('AuthContext: Setting dealer code:', user?.dealerCode || 'No dealer code');
+    setDealerCode(user?.dealerCode);
+  }, [user?.dealerCode]);
+
 
 
   const login = useCallback((payload?: { id?: string; email?: string; name?: string; menus?: import('@/types/portal').PortalMenuDto[]; token?: string; isAdmin?: boolean; dealerCode?: string | null }) => {
@@ -187,10 +193,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(undefined);
     clearPersistedAuth();
     
-    // API client'taki token'ı, user ID'sini ve admin bilgisini temizle
+    // API client'taki token'ı, user ID'sini, admin bilgisini ve dealer code'u temizle
     setAuthToken(undefined);
     setCurrentUserId(undefined);
     setIsAdmin(false);
+    setDealerCode(undefined);
     
     // Giriş sayfasına yönlendir
     navigate('/giris', { replace: true });

@@ -66,14 +66,28 @@ import {
 
 import type { ApiError } from '@/lib/apiClient';
 
-import type { DealerDto, Guid, UserDto } from '@/types/entities';
+import type { DealerDto, Guid, UserDto, CompanyTypeDto, CityDto, DistrictDto } from '@/types/entities';
+import { listCities } from '@/features/cities/api';
+import { listDistricts } from '@/features/districts/api';
 
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
 
 
 
-type DealerFormValues = Omit<DealerDto, 'id'>;
+// Backend CreateDealerRequest ile uyumlu form değerleri
+type DealerFormValues = {
+  taxIdentifierNumber: string;
+  title: string;
+  companyTypeId: Guid;
+  cityId: Guid;
+  districtId: Guid;
+  companyPhoneNumber: string;
+  companyEmailAddress: string;
+  dealerCode: string;
+  userIds: Guid[];
+  // isCustomer ve parentDealerId backend'de otomatik set ediliyor
+};
 
 
 
@@ -102,6 +116,11 @@ export const DealersPage = () => {
   } = useCrudList<DealerDto>('dealers');
 
   const { data: users } = useCrudList<UserDto>('users');
+  const { data: companyTypes } = useCrudList<CompanyTypeDto>('companytypes');
+  
+  const [cities, setCities] = useState<CityDto[]>([]);
+  const [districts, setDistricts] = useState<DistrictDto[]>([]);
+  const [selectedCityId, setSelectedCityId] = useState<Guid | null>(null);
 
 
 
@@ -126,12 +145,46 @@ export const DealersPage = () => {
 
 
   useEffect(() => {
+    // Türkiye şehirlerini yükle
+    const loadCities = async () => {
+      try {
+        const turkeyId = 'd4e5f6a7-b8c9-4d3e-a2f1-123456789abc'; // Türkiye ID
+        const citiesData = await listCities(turkeyId);
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Şehirler yüklenemedi:', error);
+      }
+    };
+    loadCities();
+  }, []);
+
+  useEffect(() => {
+    // Seçili şehre göre ilçeleri yükle
+    const loadDistricts = async () => {
+      if (selectedCityId) {
+        try {
+          const districtsData = await listDistricts(selectedCityId);
+          setDistricts(districtsData);
+        } catch (error) {
+          console.error('İlçeler yüklenemedi:', error);
+        }
+      } else {
+        setDistricts([]);
+      }
+    };
+    loadDistricts();
+  }, [selectedCityId]);
+
+  useEffect(() => {
 
     if (!isModalOpen) {
 
       form.resetFields();
 
       setEditingId(null);
+      
+      setSelectedCityId(null);
+      setDistricts([]);
 
     }
 
@@ -155,6 +208,22 @@ export const DealersPage = () => {
 
   );
 
+  const companyTypeOptions = useMemo(
+
+    () =>
+
+      companyTypes?.map((ct) => ({
+
+        label: ct.name,
+
+        value: ct.id,
+
+      })) ?? [],
+
+    [companyTypes],
+
+  );
+
 
 
   const openCreateModal = () => setIsModalOpen(true);
@@ -168,6 +237,13 @@ export const DealersPage = () => {
       const dealer = await fetchEntityById<DealerDto>('dealers', id);
 
       setEditingId(id);
+      
+      // Şehir seçili ise ilçeleri yükle
+      if (dealer.cityId) {
+        setSelectedCityId(dealer.cityId);
+        const districtsData = await listDistricts(dealer.cityId);
+        setDistricts(districtsData);
+      }
 
       form.setFieldsValue({
 
@@ -175,17 +251,17 @@ export const DealersPage = () => {
 
         title: dealer.title,
 
-        companyType: dealer.companyType,
+        companyTypeId: dealer.companyTypeId,
 
-        city: dealer.city,
+        cityId: dealer.cityId,
 
-        district: dealer.district,
+        districtId: dealer.districtId,
 
         companyPhoneNumber: dealer.companyPhoneNumber,
 
         companyEmailAddress: dealer.companyEmailAddress,
 
-        dealerCode: dealer.dealerCode ?? undefined,
+        dealerCode: dealer.dealerCode ?? '', // Zorunlu alan, boş string olarak set et
 
         userIds: dealer.userIds,
 
@@ -231,11 +307,14 @@ export const DealersPage = () => {
 
       const values = await form.validateFields();
 
-      // Bayi oluşturma sayfasında isCustomer her zaman false olarak gönderilir
+      console.log('Form Values (Dealers):', values);
+
+      // Backend zaten isCustomer: false olarak ayarlıyor, göndermeye gerek yok
       const payload = {
         ...values,
-        isCustomer: false, // Her zaman false
       };
+
+      console.log('Payload to be sent (Dealers):', payload);
 
       if (editingId) {
 
@@ -250,6 +329,8 @@ export const DealersPage = () => {
       setIsModalOpen(false);
 
     } catch (error) {
+
+      console.error('Submit error (Dealers):', error);
 
       const apiError = error as ApiError;
 
@@ -286,7 +367,7 @@ export const DealersPage = () => {
 
       title: 'Şehir',
 
-      dataIndex: 'city',
+      dataIndex: 'cityName',
 
     },
 
@@ -294,7 +375,7 @@ export const DealersPage = () => {
 
       title: 'İlçe',
 
-      dataIndex: 'district',
+      dataIndex: 'districtName',
 
     },
 
@@ -474,7 +555,7 @@ export const DealersPage = () => {
 
           initialValues={{
 
-            companyType: 1,
+            companyTypeId: undefined,
 
             userIds: [],
 
@@ -502,7 +583,7 @@ export const DealersPage = () => {
 
               >
 
-                <Input placeholder="Vergi numarasi" />
+                <Input placeholder="Vergi numarasi" disabled={!!editingId} />
 
               </Form.Item>
 
@@ -538,7 +619,7 @@ export const DealersPage = () => {
 
                 label="Şirket Tipi"
 
-                name="companyType"
+                name="companyTypeId"
 
                 rules={[{ required: true, message: 'Şirket tipi zorunludur.' }]}
 
@@ -546,11 +627,13 @@ export const DealersPage = () => {
 
                 <Select
 
-                  options={[
+                  placeholder="Şirket tipi seçin"
 
-                    { label: 'Limited Şirket', value: 1 },
+                  options={companyTypeOptions}
 
-                  ]}
+                  showSearch
+
+                  optionFilterProp="label"
 
                 />
 
@@ -564,19 +647,32 @@ export const DealersPage = () => {
 
                 label="Şehir"
 
-                name="city"
+                name="cityId"
 
                 rules={[
 
                   { required: true, message: 'Şehir zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
-
                 ]}
 
               >
 
-                <Input placeholder="Şehir" />
+                <Select
+                  placeholder="Şehir seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  onChange={(value) => {
+                    setSelectedCityId(value);
+                    form.setFieldValue('districtId', undefined);
+                  }}
+                  options={cities.map((city) => ({
+                    label: city.name,
+                    value: city.id,
+                  }))}
+                />
 
               </Form.Item>
 
@@ -588,19 +684,29 @@ export const DealersPage = () => {
 
                 label="İlçe"
 
-                name="district"
+                name="districtId"
 
                 rules={[
 
                   { required: true, message: 'İlçe zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
-
                 ]}
 
               >
 
-                <Input placeholder="İlçe" />
+                <Select
+                  placeholder="Önce şehir seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  disabled={!selectedCityId}
+                  options={districts.map((district) => ({
+                    label: district.name,
+                    value: district.id,
+                  }))}
+                />
 
               </Form.Item>
 
@@ -671,7 +777,7 @@ export const DealersPage = () => {
 
               >
 
-                <Input placeholder="Bayi kodu" />
+                <Input placeholder="Bayi kodu" disabled={!!editingId} />
 
               </Form.Item>
 

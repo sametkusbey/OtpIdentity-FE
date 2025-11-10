@@ -77,12 +77,24 @@ import type {
 
   Guid,
 
+  CountryDto,
+
+  CityDto,
+
+  DistrictDto,
+
 } from '@/types/entities';
+
+import { listCountries } from '@/features/countries/api';
+import { listCities } from '@/features/cities/api';
+import { listDistricts } from '@/features/districts/api';
 
 import type { ApiError } from '@/lib/apiClient';
 
 import { applyValidationErrors } from '@/utils/form';
 import { filterByQuery } from '@/utils/filter';
+import { listDealersForCompanyAddresses } from '@/features/dealers/api';
+import { useQuery } from '@tanstack/react-query';
 
 
 
@@ -115,6 +127,67 @@ export const CompanyAddressesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [editingId, setEditingId] = useState<Guid | null>(null);
+  
+  const [countries, setCountries] = useState<CountryDto[]>([]);
+  const [cities, setCities] = useState<CityDto[]>([]);
+  const [districts, setDistricts] = useState<DistrictDto[]>([]);
+  const [selectedCountryId, setSelectedCountryId] = useState<Guid | null>(null);
+  const [selectedCityId, setSelectedCityId] = useState<Guid | null>(null);
+  
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const countriesData = await listCountries();
+        setCountries(countriesData);
+      } catch (error) {
+        console.error('Ülkeler yüklenemedi:', error);
+      }
+    };
+    loadCountries();
+  }, []);
+
+  useEffect(() => {
+    const loadCities = async () => {
+      if (selectedCountryId) {
+        try {
+          const citiesData = await listCities(selectedCountryId);
+          setCities(citiesData);
+        } catch (error) {
+          console.error('Şehirler yüklenemedi:', error);
+        }
+      } else {
+        setCities([]);
+      }
+    };
+    loadCities();
+  }, [selectedCountryId]);
+
+  useEffect(() => {
+    const loadDistricts = async () => {
+      if (selectedCityId) {
+        try {
+          const districtsData = await listDistricts(selectedCityId);
+          setDistricts(districtsData);
+        } catch (error) {
+          console.error('İlçeler yüklenemedi:', error);
+        }
+      } else {
+        setDistricts([]);
+      }
+    };
+    loadDistricts();
+  }, [selectedCityId]);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      form.resetFields();
+      setEditingId(null);
+      setSelectedCountryId(null);
+      setSelectedCityId(null);
+      setCities([]);
+      setDistricts([]);
+    }
+  }, [isModalOpen, form]);
 
 
 
@@ -130,7 +203,14 @@ export const CompanyAddressesPage = () => {
 
   } = useCrudList<CompanyAddressDto>('companyaddresses');
 
-  const { data: dealers } = useCrudList<DealerDto>('dealers');
+  // Şirket adresleri için özel endpoint kullan - sadece yetkili müşterileri getirir
+  const { data: dealers, refetch: refetchDealers } = useQuery<DealerDto[], ApiError>({
+    queryKey: ['dealers', 'for-company-addresses'],
+    queryFn: listDealersForCompanyAddresses,
+    staleTime: 0, // Her zaman fresh data çek
+    refetchOnMount: true, // Sayfa mount olduğunda refetch et
+    refetchOnWindowFocus: false, // Window focus'ta refetch etme (isteğe bağlı)
+  });
 
 
 
@@ -174,9 +254,12 @@ export const CompanyAddressesPage = () => {
 
       setEditingId(null);
 
+    } else {
+      // Modal açıldığında dealers'ı refetch et
+      void refetchDealers();
     }
 
-  }, [form, isModalOpen]);
+  }, [form, isModalOpen, refetchDealers]);
 
 
 
@@ -186,7 +269,7 @@ export const CompanyAddressesPage = () => {
 
       dealers?.map((dealer) => ({
 
-        label: dealer.title,
+        label: `${dealer.title} ${dealer.isCustomer ? '(Müşteri)' : '(Bayi)'}`,
 
         value: dealer.id,
 
@@ -227,6 +310,19 @@ export const CompanyAddressesPage = () => {
       );
 
       setEditingId(id);
+      
+      // Ülke ve şehir seçili ise ilişkili verileri yükle
+      if (address.countryId) {
+        setSelectedCountryId(address.countryId);
+        const citiesData = await listCities(address.countryId);
+        setCities(citiesData);
+        
+        if (address.cityId) {
+          setSelectedCityId(address.cityId);
+          const districtsData = await listDistricts(address.cityId);
+          setDistricts(districtsData);
+        }
+      }
 
       form.setFieldsValue({
 
@@ -234,11 +330,11 @@ export const CompanyAddressesPage = () => {
 
         addressName: address.addressName,
 
-        country: address.country,
+        countryId: address.countryId,
 
-        city: address.city,
+        cityId: address.cityId,
 
-        district: address.district,
+        districtId: address.districtId,
 
         town: address.town ?? undefined,
 
@@ -318,6 +414,8 @@ export const CompanyAddressesPage = () => {
 
       const values = await form.validateFields();
 
+      console.log('Form Values:', values);
+
       const payload: CompanyAddressPayload = {
 
         ...values,
@@ -336,6 +434,8 @@ export const CompanyAddressesPage = () => {
 
       };
 
+      console.log('Payload to be sent:', payload);
+
       if (editingId) {
 
         await updateMutation.mutateAsync({ id: editingId, payload });
@@ -349,6 +449,8 @@ export const CompanyAddressesPage = () => {
       setIsModalOpen(false);
 
     } catch (error) {
+
+      console.error('Submit error:', error);
 
       const apiError = error as ApiError;
 
@@ -370,11 +472,22 @@ export const CompanyAddressesPage = () => {
 
     {
 
-      title: 'Bayi',
+      title: 'Bayi/Müşteri',
 
       dataIndex: 'dealerId',
 
-      render: (value: Guid) => dealerMap.get(value)?.title ?? '-',
+      render: (value: Guid) => {
+        const dealer = dealerMap.get(value);
+        if (!dealer) return '-';
+        return (
+          <span>
+            {dealer.title}{' '}
+            <Tag color={dealer.isCustomer ? 'blue' : 'green'}>
+              {dealer.isCustomer ? 'Müşteri' : 'Bayi'}
+            </Tag>
+          </span>
+        );
+      },
 
     },
 
@@ -390,7 +503,7 @@ export const CompanyAddressesPage = () => {
 
       title: 'Ülke',
 
-      dataIndex: 'country',
+      dataIndex: 'countryName',
 
     },
 
@@ -398,7 +511,7 @@ export const CompanyAddressesPage = () => {
 
       title: 'Şehir',
 
-      dataIndex: 'city',
+      dataIndex: 'cityName',
 
     },
 
@@ -406,7 +519,7 @@ export const CompanyAddressesPage = () => {
 
       title: 'İlçe',
 
-      dataIndex: 'district',
+      dataIndex: 'districtName',
 
     },
 
@@ -594,7 +707,7 @@ export const CompanyAddressesPage = () => {
 
               <Form.Item
 
-                label="Bayi"
+                label="Bayi/Müşteri"
 
                 name="dealerId"
 
@@ -648,19 +761,34 @@ export const CompanyAddressesPage = () => {
 
                 label="Ülke"
 
-                name="country"
+                name="countryId"
 
                 rules={[
 
                   { required: true, message: 'Ülke zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
-
                 ]}
 
               >
 
-                <Input placeholder="Ülke girin" />
+                <Select
+                  placeholder="Ülke seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  onChange={(value) => {
+                    setSelectedCountryId(value);
+                    form.setFieldValue('cityId', undefined);
+                    form.setFieldValue('districtId', undefined);
+                    setSelectedCityId(null);
+                  }}
+                  options={countries.map((country) => ({
+                    label: country.name,
+                    value: country.id,
+                  }))}
+                />
 
               </Form.Item>
 
@@ -672,19 +800,33 @@ export const CompanyAddressesPage = () => {
 
                 label="Şehir"
 
-                name="city"
+                name="cityId"
 
                 rules={[
 
                   { required: true, message: 'Şehir zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
-
                 ]}
 
               >
 
-                <Input placeholder="Şehir girin" />
+                <Select
+                  placeholder="Önce ülke seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  disabled={!selectedCountryId}
+                  onChange={(value) => {
+                    setSelectedCityId(value);
+                    form.setFieldValue('districtId', undefined);
+                  }}
+                  options={cities.map((city) => ({
+                    label: city.name,
+                    value: city.id,
+                  }))}
+                />
 
               </Form.Item>
 
@@ -696,19 +838,29 @@ export const CompanyAddressesPage = () => {
 
                 label="İlçe"
 
-                name="district"
+                name="districtId"
 
                 rules={[
 
                   { required: true, message: 'İlçe zorunludur.' },
 
-                  { max: 64, message: 'En fazla 64 karakter olmalıdır.' },
-
                 ]}
 
               >
 
-                <Input placeholder="İlçe girin" />
+                <Select
+                  placeholder="Önce şehir seçiniz"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  disabled={!selectedCityId}
+                  options={districts.map((district) => ({
+                    label: district.name,
+                    value: district.id,
+                  }))}
+                />
 
               </Form.Item>
 
