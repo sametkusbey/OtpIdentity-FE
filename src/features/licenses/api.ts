@@ -1,7 +1,6 @@
 import { apiClient } from '@/lib/apiClient';
 import type { Result } from '@/types/portal';
 import type { LicenseDto } from '@/types/entities';
-import { RenewalPeriodType } from '@/types/entities';
 
 // Licenses API - Dokümantasyona göre /api/licenses endpoint'leri
 
