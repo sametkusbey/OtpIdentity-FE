@@ -67,15 +67,37 @@ export enum RenewalPeriodType {
   Year = 3    // Yıllık
 }
 
+export type LicenseCardDto = BaseEntity & {
+  cardName: string;
+  renewalPeriod: number;
+  renewalPeriodType: RenewalPeriodType;
+  baseUserCount: number;
+};
+
+export type LicenseUserPackageDto = BaseEntity & {
+  licenseId: Guid;
+  userCount: number;
+  addedDate: string;
+  removedDate?: string | null;
+  addedBy?: string | null;
+  removedBy?: string | null;
+  notes?: string | null;
+  isActive: boolean;
+};
+
 export type LicenseDto = BaseEntity & {
   dealerId: Guid;
   appId: Guid;
+  licenseCardId: Guid;
   startDate: string;
   endDate?: string | null;
   renewalPeriod: number;
   renewalPeriodType: RenewalPeriodType;
   isAutoRenewed: boolean;
   isLocked: boolean;
+  baseUserCount: number;
+  activeExtraUserCount: number;
+  totalUserCount: number;
 };
 
 export type AuthorizationDto = BaseEntity & {

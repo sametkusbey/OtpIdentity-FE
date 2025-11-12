@@ -8,23 +8,15 @@ import { RenewalPeriodType } from '@/types/entities';
 export interface CreateLicenseRequest {
   dealerId: string;
   appId: string;
-  startDate: string; // datetime
-  endDate?: string; // datetime, optional
-  renewalPeriod: number; // int (required)
-  renewalPeriodType: RenewalPeriodType; // enum (required)
-  isAutoRenewed?: boolean;
-  isLocked?: boolean;
+  licenseCardId: string;
+  initialExtraUserCount: number;
 }
 
 export interface UpdateLicenseRequest {
-  dealerId?: string;
-  appId?: string;
-  startDate?: string;
-  endDate?: string;
-  renewalPeriod?: number;
-  renewalPeriodType?: RenewalPeriodType;
-  isAutoRenewed?: boolean;
-  isLocked?: boolean;
+  dealerId: string;
+  appId: string;
+  licenseCardId: string;
+  isLocked: boolean;
 }
 
 export async function listLicenses(): Promise<LicenseDto[]> {
@@ -58,10 +50,6 @@ export async function getLicense(id: string): Promise<LicenseDto> {
 }
 
 export async function createLicense(request: CreateLicenseRequest): Promise<LicenseDto> {
-  // Validasyonlar:
-  // - RenewalPeriodType geçerli enum değeri olmalı (1=Day, 2=Month, 3=Year)
-  // - StartDate EndDate'den küçük olmalı (varsa)
-  
   const res = await apiClient.post<Result<LicenseDto>>('/licenses', request);
   const payload = res.data as unknown as Result<LicenseDto> | LicenseDto;
   

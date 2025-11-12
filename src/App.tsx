@@ -12,6 +12,7 @@ import { ProgramsPage } from '@/features/programs/ProgramsPage';
 import { ProgramVersionsPage } from '@/features/programVersions/ProgramVersionsPage';
 import { ProgramEditionsPage } from '@/features/programEditions/ProgramEditionsPage';
 import { LicensesPage } from '@/features/licenses/LicensesPage';
+import { LicenseCardsPage } from '@/features/licenseCards/LicenseCardsPage';
 import { AuthorizationsPage } from '@/features/authorizations/AuthorizationsPage';
 import { ConnectionsPage } from '@/features/connections/ConnectionsPage';
 import { CompanyAddressesPage } from '@/features/companyAddresses/CompanyAddressesPage';
@@ -35,6 +36,7 @@ const App = () => (
         <Route path="/program-surumleri" element={<RequireMenu code="programVersions"><ProgramVersionsPage /></RequireMenu>} />
         <Route path="/program-yayinlari" element={<RequireMenu code="programEditions"><ProgramEditionsPage /></RequireMenu>} />
         <Route path="/lisanslar" element={<RequireMenu code="licenses"><LicensesPage /></RequireMenu>} />
+        <Route path="/lisans-kartlari" element={<RequireMenu code="licenseCards"><LicenseCardsPage /></RequireMenu>} />
         <Route path="/yetkilendirmeler" element={<RequireMenu code="authorizations"><AuthorizationsPage /></RequireMenu>} />
         <Route path="/baglantilar" element={<RequireMenu code="connections"><ConnectionsPage /></RequireMenu>} />
         <Route path="/sirket-adresleri" element={<RequireMenu code="companyAddresses"><CompanyAddressesPage /></RequireMenu>} />

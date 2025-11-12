@@ -34,6 +34,7 @@ export const navigationItems: NavigationItem[] = [
   { key: 'customers', label: 'Müşteriler', path: '/musteriler', icon: <TeamOutlined />, code: 'customers' },
   { key: 'programEditions', label: 'Program Sürümleri', path: '/program-yayinlari', icon: <BarsOutlined />, code: 'programEditions' },
   { key: 'licenses', label: 'Lisanslar', path: '/lisanslar', icon: <IdcardOutlined />, code: 'licenses' },
+  { key: 'licenseCards', label: 'Lisans Kartları', path: '/lisans-kartlari', icon: <IdcardOutlined />, code: 'licenseCards' },
   { key: 'authorizations', label: 'Yetkilendirmeler', path: '/yetkilendirmeler', icon: <CrownOutlined />, code: 'authorizations' },
   { key: 'connections', label: 'Bağlantılar', path: '/baglantilar', icon: <LinkOutlined />, code: 'connections' },
   { key: 'companyAddresses', label: 'Şirket Adresleri', path: '/sirket-adresleri', icon: <BankOutlined />, code: 'companyAddresses' },
